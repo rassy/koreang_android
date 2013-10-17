@@ -1,5 +1,6 @@
-package jp.co.iworks.koreang;
+package jp.co.iworks.koreang.web;
 
+import jp.co.iwork.koreang.util.CommonUtils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -21,9 +22,7 @@ public class WebViewActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		commonUtils = new CommonUtils(this);
-		
-		
+		commonUtils = new CommonUtils(this);		
 		LinearLayout layout = new LinearLayout(this);
 		setContentView(layout, new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		

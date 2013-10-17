@@ -1,52 +1,47 @@
 package jp.co.iworks.koreang;
 
-import static jp.co.iworks.koreang.Const.BASE_URL;
-import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
-import static jp.co.iworks.koreang.Const.SIP_SERVER;
-import static jp.co.iworks.koreang.Const.SIP_REQUEST_CODE;
-import static jp.co.iworks.koreang.Const.URL_USER_CHECK_LOGIN_STATUS;
 import static jp.co.iworks.koreang.Const.URL_USER_LOGIN;
-import static jp.co.iworks.koreang.Const.URL_USER_LOGIN_TOKEN;
 import static jp.co.iworks.koreang.Const.WEBVIEW_REQUEST_CODE;
 
-import java.text.ParseException;
+import java.util.Map;
 
-import org.json.JSONException;
+import jp.co.iwork.koreang.util.CommonUtils;
+import jp.co.iworks.koreang.phone.PhoneManager;
+import jp.co.iworks.koreang.phone.PhoneRegistrationHandler;
+import jp.co.iworks.koreang.web.WebAPI;
+import jp.co.iworks.koreang.web.WebViewActivity;
+
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
-import android.net.sip.SipException;
-import android.net.sip.SipManager;
-import android.net.sip.SipProfile;
-import android.net.sip.SipRegistrationListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	public PhoneManager phoneManager = null;
 	private CommonUtils commonUtils;
-	private ProgressDialog progressDialog;
-	private String user_name;
-	private String nick_name;
-	private String password;
-	
-	public SipManager manager = null;
-	public SipProfile profile = null;
+	private ProgressDialog progressDialog = null;
+	private String user_id = null;
+	private String nick_name = null;
+	private String password = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        commonUtils = new CommonUtils(this);
         initializeApplication();
     }
     @Override
@@ -54,12 +49,17 @@ public class MainActivity extends Activity {
 		super.onRestart();
 		initializeApplication();
     }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        phoneManager.closeManager();
+    }
     /**
      * アプリケーションを初期化します
      */
     private void initializeApplication() {
-    	if (commonUtils == null) {
-    		commonUtils = new CommonUtils(this);
+    	if (phoneManager == null) {
+    		phoneManager = new PhoneManager(this);
     	}
     	
         // 初めてだったら会員登録画面を表示
@@ -74,34 +74,67 @@ public class MainActivity extends Activity {
 				openLoginPage();		
 			}
 		});
-        
-        // ブラウザなど他から軌道したかどうかを確認
-    	loginByToken(new APIResponseHandler() {
-    		@Override
-    		public void onRespond(Object object) {
-    			// トークンで認証していない場合
-    			if ((Boolean)object) {
-    				setupDisplay();
-    			} else {
-	    			// ユーザー情報が保存されているか確認
-	    	        if (commonUtils.getSharedPrefsValue(PREF_NAME_COOKIE, "koreang[sessionid]") != null) {
-	    	        	authUser(new APIResponseHandler() {
-	    	        		@Override
-	    	        		public void onRespond(Object result) {
-	    	        			if ((Boolean)result) {
-	    	        				setupDisplay();
-	    	        			} else {
-	    	        				openLoginPage();
-	    	        			}
-	    	        		}
-	    	        	});
-	    	        	return;
-	    	        } else {
-	    	        	openLoginPage();
-	    	        }
-    			}
-    		}
-    	});
+        // トークンからログインしたときのレスポンスハンドラ
+     	final APIResponseHandler tokenHandler = new APIResponseHandler() {
+     		@Override
+     		public void onRespond(Object object) {
+     			hideProgress();
+     			try {
+     				JSONObject user = (JSONObject)object;
+     				user_id = user.getString("id");
+     				nick_name = user.getString("nickname");
+     				password = user.getString("password");
+     				setupDisplay();
+     			} catch (Exception e) {
+     				Log.d(this.toString(), object.toString());
+     				e.printStackTrace();
+     				commonUtils.showErrorDialog(e.toString());
+     			}
+     		}
+     	};
+     	
+     	// 通常認証時のレスポンスハンドラ
+     	final APIResponseHandler authHandler = new APIResponseHandler() {
+
+			@Override
+			public void onRespond(Object result) {
+				hideProgress();
+				if (result == null) {
+					openLoginPage();
+					return;
+				}
+				try {
+	 				JSONObject user = (JSONObject)result;
+	 				Log.d("MainActivity/initializeApplication", user.toString(4));
+	 				user_id = user.getString("id");
+	 				nick_name = user.getString("nickname");
+	 				password = user.getString("password");
+	 				setupDisplay();
+	 			} catch (Exception e) {
+	 				e.printStackTrace();
+	 				Log.d(this.toString(), result.toString());
+	 				commonUtils.showErrorDialog(e.toString());
+				}
+			}
+     	};
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+        	Uri uri = intent.getData();
+        	if (uri!=null) {
+        		String token = uri.getQueryParameter("token");
+        		showProgress();
+        		new WebAPI(this).loginByToken(token, tokenHandler);
+        	}
+        } else {
+        	Map<String, ?> cookies = commonUtils.getSharedPrefsAll(PREF_NAME_COOKIE);
+        	if (cookies.entrySet().size() > 0) {
+            	showProgress();
+        		new WebAPI(this).authUser(authHandler);	
+        	} else {
+        		alertDialog.show();
+        	}
+        }
     }
 
 
@@ -112,75 +145,63 @@ public class MainActivity extends Activity {
     }
     
     private void setupDisplay() {
+    	if (user_id == null || password == null) {
+    		commonUtils.showErrorDialog("user_id or password is not found.");
+    		return;
+    	}
     	TextView txtNickname = (TextView)findViewById(R.id.txtNickname);
     	txtNickname.setText(nick_name);
     	
-    	initializeManager();
+    	final TextView txtSipStatus = (TextView)findViewById(R.id.txtSipStatus);
+    	final TextView txtRetry = (TextView)findViewById(R.id.txtRetry);
+		txtRetry.setVisibility(View.INVISIBLE);
+		txtRetry.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				setupDisplay();
+			}
+		});
+		Log.d("MainActivity/setupDisplay", "user_id="+user_id+" password="+password);
+    	phoneManager.initializeManager(user_id, password, new PhoneRegistrationHandler() {
+
+			@Override
+			public void onRegistering() {
+				txtSipStatus.setText("Registarating with SIP Server...");
+				txtSipStatus.setTextColor(Color.YELLOW);
+			}
+
+			@Override
+			public void onRegistrationDone() {
+				txtSipStatus.setText("Ready");
+				txtSipStatus.setTextColor(Color.GREEN);
+			}
+
+			@Override
+			public void onRegistrationFailed() {
+				txtSipStatus.setText("Registration failed.");
+				txtSipStatus.setTextColor(Color.RED);
+				txtRetry.setVisibility(View.VISIBLE);
+			}
+    		
+    	});
+    	
+    	Button btnTestCall = (Button)findViewById(R.id.btnTestCall);
+    	btnTestCall.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				phoneManager.initializeCall();
+			}
+		});
     }
     /**
      * WebViewでログインページを表示する
      */
     private void openLoginPage() {
     	Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-    	intent.putExtra("url", getUrl(URL_USER_LOGIN));
+    	intent.putExtra("url", CommonUtils.getUrl(URL_USER_LOGIN));
     	startActivityForResult(intent, WEBVIEW_REQUEST_CODE);
-    }
-    /**
-     * Intentをチェックして他アプリから起動されたか確認する
-     * @return
-     */
-    @SuppressLint("HandlerLeak")
-	private void loginByToken(final APIResponseHandler handler) {
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
-        	Uri uri = intent.getData();
-        	if (uri!=null) {
-        		String token = uri.getQueryParameter("token");
-        		Log.d(this.toString(), token);
-        		new WebAPI(this).get(getUrl(URL_USER_LOGIN_TOKEN + "/" + token), null, new HttpResponseHandler(){
-					@Override
-					public void onSuccess(String result) {
-						JSONObject json;
-						try {
-							Log.d(this.toString(), result);
-							json = new JSONObject(result);
-							String userString = json.getString("User");
-							JSONObject user = new JSONObject(userString);
-							user_name = user.getString("name");
-							nick_name = user.getString("nickname");
-							commonUtils.putSharedPrefsValue(PREF_NAME_APP, "user_name", user_name);
-							handler.onRespond(true);
-						} catch (JSONException e) {
-							e.printStackTrace();
-							handler.onRespond(e);
-						}
-					}
-
-					@Override
-					public void onFailure(Throwable e) {
-						e.printStackTrace();
-						handler.onRespond(false);
-					}
-        		});
-        	}
-        }
-        handler.onRespond(false);
-    }
-    /**
-     * URLを取得します
-     * @param path パス
-     * @return ドメイン名+パス
-     */
-    private String getUrl(String path) {
-    	return getDomain() + path;
-    }
-    /**
-     * ドメイン名を取得する
-     * @return
-     */
-    private String getDomain() {
-    	return BASE_URL;
     }
 
     /**
@@ -192,47 +213,11 @@ public class MainActivity extends Activity {
 		if (WEBVIEW_REQUEST_CODE == requestCode) {
 			Log.d(this.toString(), "onActivityResult. resultCode=" + resultCode);
 			if (resultCode == RESULT_OK) {
-				
+				initializeApplication();
 			}
 		}
 	}
-	/**
-	 * ユーザー認証します
-	 */
-	@SuppressLint("HandlerLeak")
-	private void authUser(final APIResponseHandler handler) {
-		showProgress();
-		new WebAPI(this).post(getUrl(URL_USER_CHECK_LOGIN_STATUS + ".json"), null, new HttpResponseHandler(){
-			@Override
-			public void onSuccess(String result) {
-				hideProgress();
-				try {
-					JSONObject json = new JSONObject(result);
-					if (json.getBoolean("status")) {
-						JSONObject user = json.getJSONObject("User");
-						user_name = user.getString("name");
-						nick_name = user.getString("nickname");
-						password = user.getString("password");
-						handler.onRespond(true);
-					} else {
-						handler.onRespond(false);
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-					user_name = "";
-					handler.onRespond(false);
-				}
-			}
 
-			@Override
-			public void onFailure(Throwable e) {
-				e.printStackTrace();
-				hideProgress();
-				handler.onRespond(false);
-				openLoginPage();
-			}
-		});
-	}
 	/**
 	 * 読み込み中ダイアログを表示する
 	 */
@@ -251,49 +236,4 @@ public class MainActivity extends Activity {
 			progressDialog.dismiss();
 		}
 	}
-//////////////////////////////////////////////////////////////////////
-    /**
-     * SIPマネージャを初期化する
-     */
-    public void initializeManager() {
-        if(manager == null) {
-          manager = SipManager.newInstance(this);
-        }
-        initializeLocalProfile();
-    }
-    public void initializeLocalProfile() {
-    	try {
-			SipProfile.Builder builder = new SipProfile.Builder(user_name, SIP_SERVER);
-			builder.setPassword(password);
-			profile = builder.build();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-    	
-    	Intent i = new Intent();
-    	i.setAction("android.koreang.INCOMMING_CALL");
-    	PendingIntent pi = PendingIntent.getBroadcast(this, SIP_REQUEST_CODE, i, Intent.FILL_IN_DATA);
-    	try {
-			manager.open(profile, pi, null);
-	    	manager.setRegistrationListener(profile.getUriString(), new SipRegistrationListener(){
-	
-				@Override
-				public void onRegistering(String arg0) {
-					Log.d(this.toString(), "Registrating with SIP Server...");
-				}
-	
-				@Override
-				public void onRegistrationDone(String arg0, long arg1) {
-					Log.d(this.toString(), "Ready");
-				}
-	
-				@Override
-				public void onRegistrationFailed(String arg0, int arg1, String arg2) {
-					Log.d(this.toString(), "Registration failed.");
-				}
-	    	});
-		} catch (SipException e) {
-			e.printStackTrace();
-		}
-    }
 }

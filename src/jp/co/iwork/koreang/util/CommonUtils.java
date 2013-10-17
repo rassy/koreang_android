@@ -1,15 +1,21 @@
-package jp.co.iworks.koreang;
+package jp.co.iwork.koreang.util;
+
+import static jp.co.iworks.koreang.Const.BASE_URL;
 
 import java.util.Map;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class CommonUtils {
 	private Context mContext;
+	private AlertDialog.Builder errorDialog;
 	public CommonUtils(Context context) {
 		mContext = context;
+        errorDialog = new AlertDialog.Builder(context);
+        errorDialog.setPositiveButton("OK", null);
 	}
 
 	public String getSharedPrefsValue(String preferenceName, String key) {
@@ -26,5 +32,24 @@ public class CommonUtils {
 		editor.putString(key, value);
 		editor.commit();
 	}
-	
+    /**
+     * URLを取得します
+     * @param path パス
+     * @return ドメイン名+パス
+     */
+    public static String getUrl(String path) {
+    	return getDomain() + path;
+    }
+    /**
+     * ドメイン名を取得する
+     * @return
+     */
+    private static String getDomain() {
+    	return BASE_URL;
+    }
+    public void showErrorDialog(String message) {
+    	errorDialog.setTitle("システムエラー");
+    	errorDialog.setMessage(message);
+    	errorDialog.show();
+    }
 }

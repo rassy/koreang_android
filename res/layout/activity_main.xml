@@ -11,6 +11,7 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -59,7 +60,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:textColor="@color/black" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -80,11 +80,55 @@
                 android:id="@+id/txtTicketBalance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:paddingLeft="10dp"
                 android:textColor="@color/black" />
 
         </LinearLayout>
-    </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" >
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="SIP準備"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/txtSipStatus"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/txtRetry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="retry"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/btnTestCall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="テスト発信" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

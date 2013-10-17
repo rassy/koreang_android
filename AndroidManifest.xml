@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTING" />
     
     <application
         android:allowBackup="true"
@@ -23,7 +24,8 @@
         android:theme="@android:style/Theme.NoTitleBar" >
         <activity
             android:name="jp.co.iworks.koreang.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,7 +39,8 @@
                     android:port="80" />
             </intent-filter>
         </activity>
-        <activity android:name="jp.co.iworks.koreang.WebViewActivity" />
+        <activity android:name="jp.co.iworks.koreang.web.WebViewActivity" />
+        <receiver android:name="jp.co.iworks.koreang.phone.PhoneCallReceiver" android:label="Call Receiver"/>
     </application>
 
 </manifest>

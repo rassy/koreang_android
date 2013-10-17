@@ -1,13 +1,15 @@
-package jp.co.iworks.koreang;
+package jp.co.iworks.koreang.web;
 
-import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
 import static jp.co.iworks.koreang.Const.BASE_HOST;
+import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+
+import jp.co.iwork.koreang.util.CommonUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -26,9 +28,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-public class WebAPI {
+public class HttpRequest {
 	private CommonUtils mUtils;
-	public WebAPI(Context context) {
+	public HttpRequest(Context context) {
 		mUtils = new CommonUtils(context);
 	}
 	public void get(String url, List<NameValuePair> parameters, final HttpResponseHandler handler) {
