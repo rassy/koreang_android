@@ -25,6 +25,7 @@
         <activity
             android:name="jp.co.iworks.koreang.MainActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,7 +40,12 @@
                     android:port="80" />
             </intent-filter>
         </activity>
-        <activity android:name="jp.co.iworks.koreang.web.WebViewActivity" />
+        <activity android:name="jp.co.iworks.koreang.web.WebViewActivity"
+            android:screenOrientation="portrait"
+             />
+        <activity android:name="jp.co.iworks.koreang.TimeTableActivity"
+            android:screenOrientation="portrait"
+            />
         <receiver android:name="jp.co.iworks.koreang.phone.PhoneCallReceiver" android:label="Call Receiver"/>
     </application>
 

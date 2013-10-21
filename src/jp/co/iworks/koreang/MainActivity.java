@@ -3,6 +3,7 @@ package jp.co.iworks.koreang;
 import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
 import static jp.co.iworks.koreang.Const.URL_USER_LOGIN;
 import static jp.co.iworks.koreang.Const.WEBVIEW_REQUEST_CODE;
+import static jp.co.iworks.koreang.Const.TIMETABLE_REQUEST_CODE;
 
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public class MainActivity extends Activity {
      			hideProgress();
      			try {
      				JSONObject user = (JSONObject)object;
-     				user_id = user.getString("id");
+     				user_id = user.getString("user_id");
      				nick_name = user.getString("nickname");
      				password = user.getString("password");
      				setupDisplay();
@@ -106,7 +107,7 @@ public class MainActivity extends Activity {
 				try {
 	 				JSONObject user = (JSONObject)result;
 	 				Log.d("MainActivity/initializeApplication", user.toString(4));
-	 				user_id = user.getString("id");
+	 				user_id = user.getString("user_id");
 	 				nick_name = user.getString("nickname");
 	 				password = user.getString("password");
 	 				setupDisplay();
@@ -191,7 +192,17 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				phoneManager.initializeCall();
+				phoneManager.initializeCall("102");
+			}
+		});
+    	
+    	Button btnTimeTable = (Button)findViewById(R.id.btnTimeTable);
+    	btnTimeTable.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(getApplicationContext(), TimeTableActivity.class);
+				startActivityForResult(intent, TIMETABLE_REQUEST_CODE);
 			}
 		});
     }

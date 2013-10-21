@@ -3,6 +3,8 @@ package jp.co.iworks.koreang.web;
 import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 import static jp.co.iworks.koreang.Const.URL_USER_CHECK_LOGIN_STATUS;
 import static jp.co.iworks.koreang.Const.URL_USER_LOGIN_TOKEN;
+import static jp.co.iworks.koreang.Const.URL_TIMETABLE_INDEX;
+
 import jp.co.iwork.koreang.util.CommonUtils;
 import jp.co.iworks.koreang.APIResponseHandler;
 
@@ -78,4 +80,27 @@ public class WebAPI {
 			}
        	});
     }
+	public void getTimeTable(final APIResponseHandler handler) {
+		new HttpRequest(mContext).get(CommonUtils.getUrl(URL_TIMETABLE_INDEX), null, new HttpResponseHandler() {
+
+			@Override
+			public void onSuccess(String result) {
+				JSONObject json;
+				try {
+					json = new JSONObject(result);
+					handler.onRespond(json);
+				} catch (JSONException e) {
+					e.printStackTrace();
+					handler.onRespond(null);
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable e) {
+				e.printStackTrace();
+				handler.onRespond(null);
+			}
+			
+		});
+	}
 }

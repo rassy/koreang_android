@@ -2,11 +2,7 @@ package jp.co.iworks.koreang.phone;
 
 import static jp.co.iworks.koreang.Const.SIP_REQUEST_CODE;
 import static jp.co.iworks.koreang.Const.SIP_SERVER;
-
-import java.text.ParseException;
-
 import jp.co.iwork.koreang.util.CommonUtils;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -45,8 +41,10 @@ public class PhoneManager {
 			SipProfile.Builder builder = new SipProfile.Builder(user_id, SIP_SERVER);
 			builder.setPassword(password);
 			profile = builder.build();
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			commonUtils.showErrorDialog(e.toString());
+			return;
 		}
     	
     	Intent i = new Intent();
@@ -95,7 +93,7 @@ public class PhoneManager {
 			commonUtils.showErrorDialog(e.toString());
 		}
     }
-    public void initializeCall() {
+    public void initializeCall(String sipAddress) {
     	try {
     		SipAudioCall.Listener listener = new SipAudioCall.Listener() {
 
@@ -112,9 +110,8 @@ public class PhoneManager {
 					Log.d(this.toString(), "call ended");
 					super.onCallEnded(call);
 				}
-    			
     		};
-    		call = manager.makeAudioCall(profile.getUriString(), "2@192.168.108.222", listener, 30);
+    		call = manager.makeAudioCall(profile.getUriString(), sipAddress, listener, 30);
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
@@ -128,7 +125,6 @@ public class PhoneManager {
             mContext.unregisterReceiver(phoneReceiver);
             Log.d("PhoneManager/closeManager", "Success to unregister receiver.");
         }
-        
     }
     public void closeLocalProfile() {
         if (manager == null) {
