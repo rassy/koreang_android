@@ -1,60 +1,81 @@
 package jp.co.iworks.koreang;
 
-import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
-import static jp.co.iworks.koreang.Const.URL_USER_LOGIN;
-import static jp.co.iworks.koreang.Const.WEBVIEW_REQUEST_CODE;
-import static jp.co.iworks.koreang.Const.TIMETABLE_REQUEST_CODE;
+import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 
-import java.util.Map;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import jp.co.iwork.koreang.util.CommonUtils;
 import jp.co.iworks.koreang.phone.PhoneManager;
 import jp.co.iworks.koreang.phone.PhoneRegistrationHandler;
 import jp.co.iworks.koreang.web.WebAPI;
-import jp.co.iworks.koreang.web.WebViewActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
 
 public class MainActivity extends Activity {
 
 	public PhoneManager phoneManager = null;
 	private CommonUtils commonUtils;
 	private ProgressDialog progressDialog = null;
+	private AlertDialog.Builder errorDialog = null;
 	private String user_id = null;
+	private String uuid = null;
 	private String nick_name = null;
-	private String password = null;
 	
+// Activity LifeCycle
+//////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         commonUtils = new CommonUtils(this);
         initializeApplication();
     }
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+    @Override
 	protected void onRestart() {
 		super.onRestart();
-		initializeApplication();
+		//initializeApplication();
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
         phoneManager.closeManager();
     }
+    
+//////////////////////////////////////////////////////////////////
     /**
      * アプリケーションを初期化します
      */
@@ -62,173 +83,189 @@ public class MainActivity extends Activity {
     	if (phoneManager == null) {
     		phoneManager = new PhoneManager(this);
     	}
-    	
-        // 初めてだったら会員登録画面を表示
-        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("初期設定");
-        alertDialog.setMessage("この端末では初めてのご利用なので、ログインまたは会員登録が必要です。");
+    	uuid = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "uuid");
+    	user_id = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "user_id");
+    	// uuidが端末に残っていなかったら新規登録
+    	if (uuid == null || user_id == null) {
+    		showEntryDialog();
+    		return;
+    	}
+    	setupDisplay();
+    }
+
+    /**
+     * 名前入力画面を表示する
+     * OKを押したらuuidを生成してサーバーに送信
+     */
+    private void showEntryDialog() {
+        // 初めてだったら名前登録画面を表示
+    	final EditText txtName = new EditText(this);
+    	if (nick_name != null) {
+    		txtName.setText(nick_name);
+    	}
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("ようこそ");
+        alertDialog.setMessage("韓流語学アプリへようこそ。\nはじめにお名前を教えて下さい。");
+        alertDialog.setView(txtName);
         alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// ログインページを表示
-				openLoginPage();		
+				if (txtName.getText() == null) return;
+				
+				// 入力値
+				nick_name = txtName.getText().toString();
+				
+				// UUID生成
+				uuid = commonUtils.getUUID();
+
+				
+				showProgress();
+				
+				// 端末登録ハンドラ
+				APIResponseHandler handler = new APIResponseHandler(){
+					
+					@Override
+					public void onRespond(Object result) {
+						hideProgress();
+						Log.d("MainActivity/initializeApplication", result.toString());
+						try {
+							JSONObject json = new JSONObject(result.toString());
+							JSONObject info = json.getJSONObject("info");
+							JSONObject user = json.getJSONObject("user");
+							boolean status = info.getBoolean("status");
+							if (status) {
+								user_id = user.getString("id");
+								commonUtils.putSharedPrefsValue(PREF_NAME_APP, "uuid", uuid);
+								commonUtils.putSharedPrefsValue(PREF_NAME_APP, "user_id", user_id);
+								showDialogMessage("登録成功", "ご登録ありがとうございます！", new DialogInterface.OnClickListener() {
+									
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										setupDisplay();
+									}
+								});
+							} else {
+								showDialogMessage("登録エラー", "登録に失敗しました。\nリトライして下さい。", new DialogInterface.OnClickListener() {
+									
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										showEntryDialog();
+									}
+								});
+							}
+						} catch (JSONException e) {
+							e.printStackTrace();
+							hideProgress();
+							showDialogMessage("登録エラー", e.getMessage(), new DialogInterface.OnClickListener() {
+								
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									showEntryDialog();
+								}
+							});
+						}
+					}
+				};
+        				
+				// 端末登録
+				try {
+					new WebAPI(MainActivity.this).registByUuid(nick_name, uuid, handler);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
 		});
-        // トークンからログインしたときのレスポンスハンドラ
-     	final APIResponseHandler tokenHandler = new APIResponseHandler() {
-     		@Override
-     		public void onRespond(Object object) {
-     			hideProgress();
-     			try {
-     				JSONObject user = (JSONObject)object;
-     				user_id = user.getString("user_id");
-     				nick_name = user.getString("nickname");
-     				password = user.getString("password");
-     				setupDisplay();
-     			} catch (Exception e) {
-     				Log.d(this.toString(), object.toString());
-     				e.printStackTrace();
-     				commonUtils.showErrorDialog(e.toString());
-     			}
-     		}
-     	};
-     	
-     	// 通常認証時のレスポンスハンドラ
-     	final APIResponseHandler authHandler = new APIResponseHandler() {
+        alertDialog.show();
+    }
+
+    
+    private void setupDisplay() {
+    	new WebAPI(this).getTeacherList(new APIResponseHandler() {
 
 			@Override
 			public void onRespond(Object result) {
-				hideProgress();
-				if (result == null) {
-					openLoginPage();
-					return;
-				}
+				Log.d("MainActivity/setupDisplay", result.toString());
+				List<String> urlList = new ArrayList<String>();
 				try {
-	 				JSONObject user = (JSONObject)result;
-	 				Log.d("MainActivity/initializeApplication", user.toString(4));
-	 				user_id = user.getString("user_id");
-	 				nick_name = user.getString("nickname");
-	 				password = user.getString("password");
-	 				setupDisplay();
-	 			} catch (Exception e) {
-	 				e.printStackTrace();
-	 				Log.d(this.toString(), result.toString());
-	 				commonUtils.showErrorDialog(e.toString());
+					JSONObject json = new JSONObject(result.toString());
+					JSONObject info = json.getJSONObject("info");
+					boolean status = info.getBoolean("status");
+					if (status) {
+						JSONArray list = json.getJSONArray("list");
+						final List<Teacher> teacherList = new ArrayList<Teacher>();
+						for (int i=0; i<list.length(); i++) {
+							JSONObject teacherJson = list.getJSONObject(i);
+							String id = teacherJson.getString("id");
+							String nickname = teacherJson.getString("nickname");
+							String message = teacherJson.getString("message");
+							String url = teacherJson.getString("url");
+							if (url != null) {
+								Log.d("URL", url);
+								urlList.add(url);
+							}
+
+							Teacher teacher = new Teacher();
+							teacher.setId(id);
+							teacher.setNickname(nickname);
+							teacher.setMessage(message);
+							teacher.setUrl(url);
+							teacherList.add(teacher);
+						}
+						GridView gridView = (GridView)findViewById(R.id.gvTeacher);
+				    	gridView.setAdapter(new ImageGridViewAdapter(MainActivity.this, urlList));
+				    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+							@Override
+							public void onItemClick(AdapterView<?> parent,
+									View view, int position, long id) {
+								Teacher teacher = teacherList.get(position);
+								openTimeTable(teacher);
+							}
+						});
+				    	gridView.invalidate();
+				    	Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.motion);
+				    	gridView.setAnimation(animation);
+				    	animation.start();
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+					showDialogMessage("システムエラー", e.getMessage(), null);
 				}
 			}
-     	};
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
-        	Uri uri = intent.getData();
-        	if (uri!=null) {
-        		String token = uri.getQueryParameter("token");
-        		showProgress();
-        		new WebAPI(this).loginByToken(token, tokenHandler);
-        	}
-        } else {
-        	Map<String, ?> cookies = commonUtils.getSharedPrefsAll(PREF_NAME_COOKIE);
-        	if (cookies.entrySet().size() > 0) {
-            	showProgress();
-        		new WebAPI(this).authUser(authHandler);	
-        	} else {
-        		alertDialog.show();
-        	}
-        }
+    	});
+    	setupManager();
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-    
-    private void setupDisplay() {
-    	if (user_id == null || password == null) {
-    		commonUtils.showErrorDialog("user_id or password is not found.");
-    		return;
-    	}
-    	TextView txtNickname = (TextView)findViewById(R.id.txtNickname);
-    	txtNickname.setText(nick_name);
+    private void setupManager() {
     	
-    	final TextView txtSipStatus = (TextView)findViewById(R.id.txtSipStatus);
-    	final TextView txtRetry = (TextView)findViewById(R.id.txtRetry);
-		txtRetry.setVisibility(View.INVISIBLE);
-		txtRetry.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				setupDisplay();
-			}
-		});
-		Log.d("MainActivity/setupDisplay", "user_id="+user_id+" password="+password);
-    	phoneManager.initializeManager(user_id, password, new PhoneRegistrationHandler() {
+    	phoneManager.initializeManager(user_id, uuid, new PhoneRegistrationHandler() {
 
 			@Override
 			public void onRegistering() {
-				txtSipStatus.setText("Registarating with SIP Server...");
-				txtSipStatus.setTextColor(Color.YELLOW);
+				Log.d("MainActivity/setupDisplay", "SIP Registering");
 			}
 
 			@Override
 			public void onRegistrationDone() {
-				txtSipStatus.setText("Ready");
-				txtSipStatus.setTextColor(Color.GREEN);
+				Log.d("MainActivity/setupDisplay", "SIP Registration finished");
+				
 			}
 
 			@Override
 			public void onRegistrationFailed() {
-				txtSipStatus.setText("Registration failed.");
-				txtSipStatus.setTextColor(Color.RED);
-				txtRetry.setVisibility(View.VISIBLE);
+				Log.d("MainActivity/setupDisplay", "SIP Registration failed.");
 			}
-    		
+
     	});
-    	
-    	Button btnTestCall = (Button)findViewById(R.id.btnTestCall);
-    	btnTestCall.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				phoneManager.initializeCall("102");
-			}
-		});
-    	
-    	Button btnTimeTable = (Button)findViewById(R.id.btnTimeTable);
-    	btnTimeTable.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(getApplicationContext(), TimeTableActivity.class);
-				startActivityForResult(intent, TIMETABLE_REQUEST_CODE);
-			}
-		});
     }
-    /**
-     * WebViewでログインページを表示する
-     */
-    private void openLoginPage() {
-    	Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-    	intent.putExtra("url", CommonUtils.getUrl(URL_USER_LOGIN));
-    	startActivityForResult(intent, WEBVIEW_REQUEST_CODE);
+    private void openTimeTable(Teacher teacher) {
+    	Intent intent = new Intent(this, TimeTableActivity.class);
+    	intent.putExtra("teacher_id", teacher.getId());
+    	intent.putExtra("nickname", teacher.getNickname());
+    	intent.putExtra("message", teacher.getMessage());
+    	intent.putExtra("url", teacher.getUrl());
+    	startActivity(intent);
     }
-
-    /**
-     * WebViewからのレスポンス
-     */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (WEBVIEW_REQUEST_CODE == requestCode) {
-			Log.d(this.toString(), "onActivityResult. resultCode=" + resultCode);
-			if (resultCode == RESULT_OK) {
-				initializeApplication();
-			}
-		}
-	}
-
 	/**
 	 * 読み込み中ダイアログを表示する
 	 */
@@ -246,5 +283,65 @@ public class MainActivity extends Activity {
 		if (progressDialog != null && progressDialog.isShowing()) {
 			progressDialog.dismiss();
 		}
+	}
+	/**
+	 * エラーダイアログを表示する
+	 * @param message エラーメッセージ
+	 * @param listener OKを押したときのハンドラ
+	 */
+	private void showDialogMessage(String title, String message, DialogInterface.OnClickListener listener) {
+		if (errorDialog == null) {
+			errorDialog = new AlertDialog.Builder(this);
+		}
+		errorDialog.setTitle(title);
+		errorDialog.setMessage(message);
+		errorDialog.setPositiveButton("OK", listener);
+		errorDialog.show();
+	}
+	
+	private class Teacher {
+		private String id;
+		private String uuid;
+		private String email;
+		private String nickname;
+		private String url;
+		private String message;
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
+		public String getUuid() {
+			return uuid;
+		}
+		public void setUuid(String uuid) {
+			this.uuid = uuid;
+		}
+		public String getEmail() {
+			return email;
+		}
+		public void setEmail(String email) {
+			this.email = email;
+		}
+		public String getNickname() {
+			return nickname;
+		}
+		public void setNickname(String nickname) {
+			this.nickname = nickname;
+		}
+		public String getUrl() {
+			return url;
+		}
+		public void setUrl(String url) {
+			this.url = url;
+		}
+		public String getMessage() {
+			return message;
+		}
+		public void setMessage(String message) {
+			this.message = message;
+		}
+		
 	}
 }

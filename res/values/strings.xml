@@ -3,6 +3,10 @@
 
     <string name="app_name">Koreang</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="navi_home">ホーム</string>
+    <string name="navi_ticket">チケット</string>
+    <string name="navi_reservation">予約</string>
+    <string name="navi_config">設定</string>
+    <string name="imageDescription">写真</string>
 
 </resources>

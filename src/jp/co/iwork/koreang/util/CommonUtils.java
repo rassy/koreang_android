@@ -2,16 +2,29 @@ package jp.co.iwork.koreang.util;
 
 import static jp.co.iworks.koreang.Const.BASE_URL;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.UUID;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+/**
+ * ユーティリティークラス
+ * @author tryumura
+ *
+ */
 public class CommonUtils {
+	// コンテキスト
 	private Context mContext;
 	private AlertDialog.Builder errorDialog;
+	/**
+	 * コンストラクタ
+	 * @param context
+	 */
 	public CommonUtils(Context context) {
 		mContext = context;
         errorDialog = new AlertDialog.Builder(context);
@@ -51,5 +64,27 @@ public class CommonUtils {
     	errorDialog.setTitle("システムエラー");
     	errorDialog.setMessage(message);
     	errorDialog.show();
+    }
+    
+    public String getUUID() {
+    	return UUID.randomUUID().toString();
+    }
+    public String md5(String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+             
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0; i<messageDigest.length; i++)
+                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            return hexString.toString();
+             
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

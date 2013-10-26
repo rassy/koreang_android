@@ -17,9 +17,7 @@ public class Const {
 	
 	public static final int TIMETABLE_REQUEST_CODE = 9012;
 	/** URL関連 */
-	public static final String URL_USER_LOGIN = "/lang/users/login";
-	public static final String URL_USER_CHECK_LOGIN_STATUS = "/lang/users/checkLoginStatus";
-	public static final String URL_USER_INDEX = "/lang/users/index";
-	public static final String URL_USER_LOGIN_TOKEN = "/lang/users/loginByToken";
-	public static final String URL_TIMETABLE_INDEX = "/lang/timeTables/index.json";
+	public static final String URL_USER_REGIST = "/users/regist.json";
+	public static final String URL_TEACHER_INDEX = "/teachers/index.json";
+	public static final String URL_TIMETABLE_INDEX = "/timeTables/index.json";
 }

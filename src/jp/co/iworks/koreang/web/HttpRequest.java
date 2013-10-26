@@ -1,7 +1,7 @@
 package jp.co.iworks.koreang.web;
 
 import static jp.co.iworks.koreang.Const.BASE_HOST;
-import static jp.co.iworks.koreang.Const.PREF_NAME_COOKIE;
+import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
@@ -30,10 +31,13 @@ import android.util.Log;
 
 public class HttpRequest {
 	private CommonUtils mUtils;
+	private String uuid;
+	
 	public HttpRequest(Context context) {
 		mUtils = new CommonUtils(context);
+		uuid = mUtils.getSharedPrefsValue(PREF_NAME_APP, "uuid");
 	}
-	public void get(String url, List<NameValuePair> parameters, final HttpResponseHandler handler) {
+	public void get(String url, List<BasicNameValuePair> parameters, final HttpResponseHandler handler) {
 		String newUrl = url;
 		if (parameters != null) {
 			for (NameValuePair param : parameters) {
@@ -57,11 +61,11 @@ public class HttpRequest {
 			e.printStackTrace();
 		}
 	}
-	public void post(String url, List<NameValuePair> parameters, final HttpResponseHandler handler) {
+	public void post(String url, List<BasicNameValuePair> parameters, final HttpResponseHandler handler) {
 		HttpPost request = new HttpPost(url);
 		try {
 			if (parameters != null) {
-				request.setEntity(new UrlEncodedFormEntity(parameters));
+				request.setEntity(new UrlEncodedFormEntity(parameters, "UTF-8"));
 			}
 			execute(request, handler);
 		} catch (UnsupportedEncodingException e) {
@@ -71,13 +75,13 @@ public class HttpRequest {
 	private void execute(final HttpUriRequest request, final HttpResponseHandler handler) {
 		final Handler mainHandler = new Handler();
 		final DefaultHttpClient httpClient = new DefaultHttpClient();
-		Map<String, ?> map = mUtils.getSharedPrefsAll(PREF_NAME_COOKIE);
-		for (Map.Entry<String, ?> e : map.entrySet()) {
-			BasicClientCookie bCookie = new BasicClientCookie(e.getKey(), e.getValue().toString());
-			bCookie.setDomain(BASE_HOST);
-			bCookie.setPath("/");
-			httpClient.getCookieStore().addCookie(bCookie);			
-		}
+		
+		
+		BasicClientCookie cookie = new BasicClientCookie("CakeCookie[uuid]", uuid);
+		cookie.setDomain(BASE_HOST);
+		cookie.setPath("/");
+		httpClient.getCookieStore().addCookie(cookie);
+		
 		new Thread(new Runnable(){
 			@Override
 			public void run() {

@@ -1,8 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:orientation="vertical"
     android:padding="0dp"
     android:paddingBottom="0dp"
     android:paddingLeft="0dp"
@@ -16,125 +16,21 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <LinearLayout
-            android:id="@+id/linearLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#003d4c"
-            android:orientation="vertical" >
-
-            <View
-                android:id="@+id/view1"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="韓国語レッスン" />
-
-            <View
-                android:id="@+id/view2"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" >
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="ニックネーム"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/txtNickname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:textColor="@color/black" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp" >
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="チケット残高"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/txtTicketBalance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:paddingLeft="10dp"
-                android:textColor="@color/black" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp" >
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="SIP準備"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/txtSipStatus"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/txtRetry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="retry"
-                android:textColor="@color/black" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical" >
-
-            <Button
-                android:id="@+id/btnTestCall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="テスト発信" />
-
-            <Button
-                android:id="@+id/btnTimeTable"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="予約" />
-
-        </LinearLayout>
+ 	<include layout="@layout/titlebar" />
 
     </LinearLayout>
 
-</RelativeLayout>
+    <GridView
+        android:id="@+id/gvTeacher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:horizontalSpacing="0dp"
+        android:verticalSpacing="0dp"
+        android:numColumns="2"
+        android:listSelector="#000000" >
+
+    </GridView>
+
+
+
+</LinearLayout>
