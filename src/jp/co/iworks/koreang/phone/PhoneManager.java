@@ -16,26 +16,32 @@ import android.os.Handler;
 import android.util.Log;
 
 public class PhoneManager {
-	public SipManager manager = null;
+	private SipManager manager = null;
 	private SipProfile profile = null;
 	public SipAudioCall call = null;
 	private PhoneCallReceiver phoneReceiver;
-	private Context mContext;
+	
 	private CommonUtils commonUtils = null;
-	public PhoneManager (Context context) {
-		mContext = context;
+
+	private static PhoneManager instance = new PhoneManager();
+	private PhoneManager() {
+	}
+	public static PhoneManager getInstance() {
+		return instance;
+	}
+    /**
+     * SIPマネージャを初期化する
+     */
+    public void initializeManager(Context context, String user_id, String password, final PhoneRegistrationHandler registrationHandler) {
+		
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("android.koreang.INCOMMING_CALL");
 		phoneReceiver = new PhoneCallReceiver();
 		context.registerReceiver(phoneReceiver, filter);
 		commonUtils = new CommonUtils(context);
-	}
-    /**
-     * SIPマネージャを初期化する
-     */
-    public void initializeManager(String user_id, String password, final PhoneRegistrationHandler registrationHandler) {
+
         if(manager == null) {
-        	manager = SipManager.newInstance(mContext);
+        	manager = SipManager.newInstance(context);
         }
     	try {
 			SipProfile.Builder builder = new SipProfile.Builder(user_id, SIP_SERVER);
@@ -49,7 +55,7 @@ public class PhoneManager {
     	
     	Intent i = new Intent();
     	i.setAction("android.koreang.INCOMMING_CALL");
-    	PendingIntent pi = PendingIntent.getBroadcast(mContext, SIP_REQUEST_CODE, i, Intent.FILL_IN_DATA);
+    	PendingIntent pi = PendingIntent.getBroadcast(context, SIP_REQUEST_CODE, i, Intent.FILL_IN_DATA);
     	
     	final Handler handler = new Handler();
     	try {
@@ -57,33 +63,31 @@ public class PhoneManager {
 	    	manager.setRegistrationListener(profile.getUriString(), new SipRegistrationListener(){
 	
 				@Override
-				public void onRegistering(String arg0) {
+				public void onRegistering(final String localProfileUri) {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							registrationHandler.onRegistering();
+							registrationHandler.onRegistering(localProfileUri);
 						}
 					});
 				}
 	
 				@Override
-				public void onRegistrationDone(String arg0, long arg1) {
+				public void onRegistrationDone(final String localProfileUri, final long expiryTime) {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							registrationHandler.onRegistrationDone();
+							registrationHandler.onRegistrationDone(localProfileUri, expiryTime);
 						}
 					});
 				}
 	
 				@Override
-				public void onRegistrationFailed(String arg0, int arg1, String arg2) {
-					Log.d(this.toString(), arg0);
-					Log.d(this.toString(), arg2);
+				public void onRegistrationFailed(final String localProfileUri, final int errorCode, final String errorMessage) {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							registrationHandler.onRegistrationFailed();
+							registrationHandler.onRegistrationFailed(localProfileUri, errorCode, errorMessage);
 						}
 					});
 				}
@@ -93,50 +97,63 @@ public class PhoneManager {
 			commonUtils.showErrorDialog(e.toString());
 		}
     }
-    public void initializeCall(String sipAddress) {
-    	try {
-    		SipAudioCall.Listener listener = new SipAudioCall.Listener() {
+    public void initializeCall(String sipAddress) throws SipException {
+		SipAudioCall.Listener listener = new SipAudioCall.Listener() {
 
-				@Override
-				public void onCallEstablished(SipAudioCall call) {
-					Log.d(this.toString(), "call established");
-					call.startAudio();
-					call.setSpeakerMode(true);
-					call.toggleMute();
-				}
+			@Override
+			public void onCallEstablished(SipAudioCall call) {
+				Log.d(this.toString(), "call established");
+				call.startAudio();
+				call.setSpeakerMode(true);
+				call.toggleMute();
+			}
 
-				@Override
-				public void onCallEnded(SipAudioCall call) {
-					Log.d(this.toString(), "call ended");
-					super.onCallEnded(call);
-				}
-    		};
-    		call = manager.makeAudioCall(profile.getUriString(), sipAddress, listener, 30);
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
+			@Override
+			public void onCallEnded(SipAudioCall call) {
+				Log.d(this.toString(), "call ended");
+				super.onCallEnded(call);
+			}
+		};
+		call = manager.makeAudioCall(profile.getUriString(), sipAddress, listener, 30);
+    	
     }
-    public void closeManager() {         
+    public void initializeTalk(Intent intent, SipAudioCall.Listener listener) throws SipException {
+    	call = manager.takeAudioCall(intent, listener);
+    }
+    public void startTalk() throws SipException {
+		call.answerCall(30);
+        call.startAudio();
+        call.setSpeakerMode(true);
+        if(call.isMuted()) {
+            call.toggleMute();
+        }
+    }
+    public void endTalk() throws SipException {
+    	call.endCall();
+    	call.close();
+
+    }
+    public void closeManager(Context context) {         
 	    if (call != null) {
 	        call.close();
 	    }
-        closeLocalProfile();
+	    try {
+	    	closeLocalProfile();
+	    } catch (SipException e) {
+	    	e.printStackTrace();
+	    }
         if (phoneReceiver != null) {
-            mContext.unregisterReceiver(phoneReceiver);
+            context.unregisterReceiver(phoneReceiver);
             Log.d("PhoneManager/closeManager", "Success to unregister receiver.");
         }
     }
-    public void closeLocalProfile() {
+    public void closeLocalProfile() throws SipException {
         if (manager == null) {
             return;
         }
-        try {
-            if (profile != null) {
-                manager.close(profile.getUriString());
-                Log.d("PhoneManager/closeLocalProfile", "Success to close local profile.");
-            }
-        } catch (Exception ee) {
-            Log.d("PhoneManager/closeLocalProfile", "Failed to close local profile.", ee);
+        if (profile != null) {
+            manager.close(profile.getUriString());
+            Log.d("PhoneManager/closeLocalProfile", "Success to close local profile.");
         }
     }
 }

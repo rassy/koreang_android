@@ -1,8 +1,9 @@
 package jp.co.iworks.koreang.web;
 
+import static jp.co.iworks.koreang.Const.URL_RESERVATION_REGIST;
 import static jp.co.iworks.koreang.Const.URL_TEACHER_INDEX;
-import static jp.co.iworks.koreang.Const.URL_USER_REGIST;
 import static jp.co.iworks.koreang.Const.URL_TIMETABLE_INDEX;
+import static jp.co.iworks.koreang.Const.URL_USER_REGIST;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -12,10 +13,8 @@ import jp.co.iwork.koreang.util.CommonUtils;
 import jp.co.iworks.koreang.APIResponseHandler;
 
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
 
 import android.content.Context;
-import android.util.Log;
 
 
 public class WebAPI {
@@ -75,5 +74,25 @@ public class WebAPI {
 			}
 			
 		});
+	}
+	public void postReservation(String teacherId, String timeTableId, String targetDate, final APIResponseHandler handler) {
+		List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
+		parameters.add(new BasicNameValuePair("teacher_id", teacherId));
+		parameters.add(new BasicNameValuePair("time_table_id", timeTableId));
+		parameters.add(new BasicNameValuePair("target_date", targetDate));
+		new HttpRequest(mContext).post(CommonUtils.getUrl(URL_RESERVATION_REGIST), parameters, new HttpResponseHandler(){
+
+			@Override
+			public void onSuccess(String result) {
+				handler.onRespond(result);
+			}
+
+			@Override
+			public void onFailure(Throwable e) {
+				handler.onRespond(e);
+			}
+			
+		});
+				
 	}
 }

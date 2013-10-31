@@ -2,10 +2,7 @@ package jp.co.iworks.koreang;
 
 import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,27 +18,22 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	public PhoneManager phoneManager = null;
 	private CommonUtils commonUtils;
 	private ProgressDialog progressDialog = null;
 	private AlertDialog.Builder errorDialog = null;
@@ -72,7 +64,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        phoneManager.closeManager();
+        PhoneManager.getInstance().closeManager(this);
     }
     
 //////////////////////////////////////////////////////////////////
@@ -80,9 +72,6 @@ public class MainActivity extends Activity {
      * アプリケーションを初期化します
      */
     private void initializeApplication() {
-    	if (phoneManager == null) {
-    		phoneManager = new PhoneManager(this);
-    	}
     	uuid = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "uuid");
     	user_id = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "user_id");
     	// uuidが端末に残っていなかったら新規登録
@@ -180,6 +169,8 @@ public class MainActivity extends Activity {
 
     
     private void setupDisplay() {
+
+		((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.WHITE);
     	new WebAPI(this).getTeacherList(new APIResponseHandler() {
 
 			@Override
@@ -238,22 +229,24 @@ public class MainActivity extends Activity {
 
     private void setupManager() {
     	
-    	phoneManager.initializeManager(user_id, uuid, new PhoneRegistrationHandler() {
+    	PhoneManager.getInstance().initializeManager(this, "888" + user_id, uuid, new PhoneRegistrationHandler() {
 
 			@Override
-			public void onRegistering() {
-				Log.d("MainActivity/setupDisplay", "SIP Registering");
+			public void onRegistering(String localProfileUri) {
+				Log.d(this.toString(), "SIP Registering. localProfileUri="+localProfileUri);
+				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.YELLOW);
 			}
 
 			@Override
-			public void onRegistrationDone() {
-				Log.d("MainActivity/setupDisplay", "SIP Registration finished");
-				
+			public void onRegistrationDone(String localProfileUri, long expiryTime) {
+				Log.d(this.toString(), "SIP Registration finished. localProfileUri="+localProfileUri);
+				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.GREEN);
 			}
 
 			@Override
-			public void onRegistrationFailed() {
-				Log.d("MainActivity/setupDisplay", "SIP Registration failed.");
+			public void onRegistrationFailed(String localProfileUri, int errorCode, String errorMessage) {
+				Log.e(this.toString(), "SIP Registration failed. localProfileUri="+localProfileUri+",errorCode="+errorCode+",message="+errorMessage);
+				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.RED);
 			}
 
     	});

@@ -20,4 +20,5 @@ public class Const {
 	public static final String URL_USER_REGIST = "/users/regist.json";
 	public static final String URL_TEACHER_INDEX = "/teachers/index.json";
 	public static final String URL_TIMETABLE_INDEX = "/timeTables/index.json";
+	public static final String URL_RESERVATION_REGIST = "/reservations/regist.json";
 }

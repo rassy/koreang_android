@@ -56,16 +56,38 @@
  			    android:gravity="center_vertical" />
 
  		</LinearLayout>
-		＜
- 		<TextView
- 		    android:id="@+id/txtTargetDate"
+
+ 		<LinearLayout
  		    android:layout_width="match_parent"
  		    android:layout_height="wrap_content"
- 		    android:layout_marginLeft="20dp"
- 		    android:layout_marginRight="20dp"
- 		    android:textColor="#CCCCCC"
- 		    android:textSize="20sp"
- 		    android:textStyle="bold" />
+ 		    android:layout_marginBottom="20dp"
+ 		    android:layout_marginTop="10dp"
+ 		    android:gravity="center" >
+
+ 			<ImageButton
+ 			    android:id="@+id/btnPrevious"
+ 			    android:layout_width="wrap_content"
+ 			    android:layout_height="wrap_content"
+ 			    android:background="@drawable/back" />
+
+ 			<TextView
+ 			    android:id="@+id/txtTargetDate"
+ 			    android:layout_width="wrap_content"
+ 			    android:layout_height="match_parent"
+ 			    android:layout_marginLeft="20dp"
+ 			    android:layout_marginRight="20dp"
+ 			    android:text="2013-10-28"
+ 			    android:textColor="#CCCCCC"
+ 			    android:textSize="22sp"
+ 			    android:textStyle="bold" />
+
+ 			<ImageButton
+ 			    android:id="@+id/btnNext"
+ 			    android:layout_width="wrap_content"
+ 			    android:layout_height="wrap_content"
+ 			    android:background="@drawable/next" />
+
+ 		</LinearLayout>
 
  		<ListView
  		    android:id="@+id/listTime"
