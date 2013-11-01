@@ -37,41 +37,48 @@ public final class R {
         public static final int next_push=0x7f020004;
     }
     public static final class id {
-        public static final int action_settings=0x7f0b0019;
-        public static final int btnNext=0x7f0b0013;
-        public static final int btnPrevious=0x7f0b0011;
+        public static final int action_settings=0x7f0b001b;
+        public static final int btnEndTalking=0x7f0b0005;
+        public static final int btnNext=0x7f0b0012;
+        public static final int btnPrevious=0x7f0b0010;
         public static final int btnReject=0x7f0b0004;
         public static final int btnReply=0x7f0b0003;
-        public static final int btnReserve=0x7f0b0009;
-        public static final int button2=0x7f0b000a;
-        public static final int button3=0x7f0b000b;
-        public static final int button4=0x7f0b000c;
-        public static final int gvTeacher=0x7f0b0001;
-        public static final int imagegridview_iv_image=0x7f0b0005;
-        public static final int ivTeacher=0x7f0b000e;
-        public static final int linearLayout1=0x7f0b0015;
-        public static final int linearLayout11=0x7f0b000d;
-        public static final int linearLayout2=0x7f0b0000;
-        public static final int listTime=0x7f0b0014;
+        public static final int btnReservationCancel=0x7f0b0009;
+        public static final int btnReserve=0x7f0b0016;
+        public static final int gvTeacher=0x7f0b000a;
+        public static final int imagegridview_iv_image=0x7f0b000b;
+        public static final int ivTeacher=0x7f0b000d;
+        public static final int linearLayout1=0x7f0b0017;
+        public static final int linearLayout11=0x7f0b000c;
+        public static final int listReservation=0x7f0b0006;
+        public static final int listTime=0x7f0b0013;
+        public static final int phoneContent=0x7f0b0001;
+        public static final int realtabcontent=0x7f0b0000;
         public static final int textView1=0x7f0b0002;
-        public static final int textView3=0x7f0b0007;
-        public static final int txtTargetDate=0x7f0b0012;
-        public static final int txtTeacherMessage=0x7f0b0010;
-        public static final int txtTeacherName=0x7f0b000f;
-        public static final int txtTicketBalance=0x7f0b0017;
-        public static final int txtTimeTo=0x7f0b0008;
-        public static final int txtTitle=0x7f0b0006;
-        public static final int view1=0x7f0b0016;
-        public static final int view2=0x7f0b0018;
+        public static final int textView3=0x7f0b0014;
+        public static final int txtNickname=0x7f0b0007;
+        public static final int txtTargetDate=0x7f0b0011;
+        public static final int txtTeacherMessage=0x7f0b000f;
+        public static final int txtTeacherName=0x7f0b000e;
+        public static final int txtTicketBalance=0x7f0b0019;
+        public static final int txtTimeTo=0x7f0b0015;
+        public static final int txtTitle=0x7f0b0008;
+        public static final int view1=0x7f0b0018;
+        public static final int view2=0x7f0b001a;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int calling=0x7f030001;
-        public static final int image_grid_view=0x7f030002;
-        public static final int list_table_row=0x7f030003;
-        public static final int navigator=0x7f030004;
-        public static final int time_table_view=0x7f030005;
-        public static final int titlebar=0x7f030006;
+        public static final int phone=0x7f030001;
+        public static final int phone_calling=0x7f030002;
+        public static final int phone_talking=0x7f030003;
+        public static final int profile=0x7f030004;
+        public static final int reservation_list=0x7f030005;
+        public static final int reservation_list_row=0x7f030006;
+        public static final int teacher_list=0x7f030007;
+        public static final int teacher_list_grid=0x7f030008;
+        public static final int time_table_list=0x7f030009;
+        public static final int time_table_list_row=0x7f03000a;
+        public static final int titlebar=0x7f03000b;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;

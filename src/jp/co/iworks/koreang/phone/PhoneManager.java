@@ -117,13 +117,20 @@ public class PhoneManager {
 		call = manager.makeAudioCall(profile.getUriString(), sipAddress, listener, 30);
     	
     }
+    public void answerTalk() {
+    	try {
+			call.answerCall(30);
+		} catch (SipException e) {
+			e.printStackTrace();
+		}
+    }
     public void initializeTalk(Intent intent, SipAudioCall.Listener listener) throws SipException {
     	call = manager.takeAudioCall(intent, listener);
     }
     public void startTalk() throws SipException {
 		call.answerCall(30);
         call.startAudio();
-        call.setSpeakerMode(true);
+        //call.setSpeakerMode(true);
         if(call.isMuted()) {
             call.toggleMute();
         }

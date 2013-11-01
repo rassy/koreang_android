@@ -46,7 +46,7 @@ public class TimeTableActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.time_table_view);
+		setContentView(R.layout.time_table_list);
 		
 		setupDisplay();
 	}
@@ -160,7 +160,7 @@ public class TimeTableActivity extends Activity {
 		txtTargetDate.setText(targetDate);
 		
 		ListView listView = (ListView)findViewById(R.id.listTime);
-		ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.list_table_row);
+		ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.time_table_list_row);
 		listView.setAdapter(adapter);
 
 		JSONArray list = results.getJSONArray("list");

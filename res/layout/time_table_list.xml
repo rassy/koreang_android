@@ -76,7 +76,6 @@
  			    android:layout_height="match_parent"
  			    android:layout_marginLeft="20dp"
  			    android:layout_marginRight="20dp"
- 			    android:text="2013-10-28"
  			    android:textColor="#CCCCCC"
  			    android:textSize="22sp"
  			    android:textStyle="bold" />

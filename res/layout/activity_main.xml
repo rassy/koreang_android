@@ -1,36 +1,33 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="0dp"
-    android:paddingBottom="0dp"
-    android:paddingLeft="0dp"
-    android:paddingRight="0dp"
-    android:paddingTop="0dp"
-    tools:context=".MainActivity" >
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
- 	<include layout="@layout/titlebar" />
-
-    </LinearLayout>
-
-    <GridView
-        android:id="@+id/gvTeacher"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:horizontalSpacing="0dp"
-        android:verticalSpacing="0dp"
-        android:numColumns="2"
-        android:listSelector="#000000" >
-
-    </GridView>
-
-
-
+    android:orientation="vertical">
+   	<include layout="@layout/titlebar" />
+   	<TabHost
+   	    android:id="@android:id/tabhost"
+   	    android:layout_width="match_parent"
+    	android:layout_height="match_parent">
+   	    
+	    <LinearLayout
+	        android:orientation="vertical"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent">
+	       	<TabWidget
+	            android:id="@android:id/tabs"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            />
+	        <FrameLayout
+	            android:id="@android:id/tabcontent"
+	            android:layout_width="0dp"
+	            android:layout_height="0dp"
+	            />
+	        <FrameLayout
+	            android:id="@+id/realtabcontent"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            />
+	  	    </LinearLayout>
+	</TabHost>
 </LinearLayout>

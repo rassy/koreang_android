@@ -28,7 +28,7 @@ public class ImageGridViewAdapter extends BaseAdapter {
 		ViewHolder holder;
 		if (view == null) {
 			holder = new ViewHolder();
-			view = inflater.inflate(R.layout.image_grid_view, null);
+			view = inflater.inflate(R.layout.teacher_list_grid, null);
 			// 画像
 			holder.iv_image = (ImageView) view.findViewById(R.id.imagegridview_iv_image);
 			// 画像の非同期DL

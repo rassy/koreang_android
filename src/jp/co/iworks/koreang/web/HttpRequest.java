@@ -98,7 +98,7 @@ public class HttpRequest {
 							case HttpStatus.SC_NOT_FOUND:
 								throw new RuntimeException("Data not found.");
 							default:
-								Log.e(this.toString(), String.valueOf(response.getStatusLine().getStatusCode()));
+								Log.e(this.toString(), "code="+String.valueOf(response.getStatusLine().getStatusCode()) + ",data=" + EntityUtils.toString(response.getEntity(), "UTF-8"));
 								throw new RuntimeException("Unexpected error.");
 							}
 						}

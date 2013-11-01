@@ -21,4 +21,6 @@ public class Const {
 	public static final String URL_TEACHER_INDEX = "/teachers/index.json";
 	public static final String URL_TIMETABLE_INDEX = "/timeTables/index.json";
 	public static final String URL_RESERVATION_REGIST = "/reservations/regist.json";
+	public static final String URL_RESERVATION_INDEX_BY_UUID = "/reservations/indexByUuid.json";
+	public static final String URL_RESERVAION_CANCEL = "/reservations/cancel.json";
 }

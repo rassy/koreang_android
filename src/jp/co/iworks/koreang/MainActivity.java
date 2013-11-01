@@ -3,36 +3,33 @@ package jp.co.iworks.koreang;
 import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 import jp.co.iwork.koreang.util.CommonUtils;
 import jp.co.iworks.koreang.phone.PhoneManager;
 import jp.co.iworks.koreang.phone.PhoneRegistrationHandler;
 import jp.co.iworks.koreang.web.WebAPI;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.GridView;
+import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity implements TabHost.OnTabChangeListener {
 
 	private CommonUtils commonUtils;
 	private ProgressDialog progressDialog = null;
@@ -40,13 +37,39 @@ public class MainActivity extends Activity {
 	private String user_id = null;
 	private String uuid = null;
 	private String nick_name = null;
-	
+	// TabHost
+    private TabHost mTabHost;
+
+    private String mLastTabId;
+
 // Activity LifeCycle
 //////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        mTabHost.setup();        
+
+        /* Tab1 設定 */
+        TabSpec tab1 = mTabHost.newTabSpec("teacher");
+        tab1.setIndicator("キャスト");                  
+        tab1.setContent(new DummyTabFactory(this)); 
+        mTabHost.addTab(tab1);                      
+
+        // Tab2 設定
+        TabSpec tab2 = mTabHost.newTabSpec("reservation");
+        tab2.setIndicator("予約一覧");                  
+        tab2.setContent(new DummyTabFactory(this)); 
+        mTabHost.addTab(tab2);         
+        
+        TabSpec tab3 = mTabHost.newTabSpec("profile");
+        tab3.setIndicator("プロフィール設定");
+        tab3.setContent(new DummyTabFactory(this));
+        mTabHost.addTab(tab3);
+        
+        mTabHost.setOnTabChangedListener(this);
         
         commonUtils = new CommonUtils(this);
         initializeApplication();
@@ -66,7 +89,39 @@ public class MainActivity extends Activity {
         super.onDestroy();
         PhoneManager.getInstance().closeManager(this);
     }
-    
+	@Override
+	public void onTabChanged(String tabId) {
+		if (mLastTabId != tabId) {
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+			if ("teacher".equals(tabId)) {
+				fragmentTransaction.replace(R.id.realtabcontent, new TeacherListFragment());
+			} else if ("reservation".equals(tabId)) {
+				fragmentTransaction.replace(R.id.realtabcontent, new ReservationListFragment());
+			} else if ("profile".equals(tabId)) {
+				fragmentTransaction.replace(R.id.realtabcontent, new ProfileFragment());
+			}
+			mLastTabId = tabId;
+			fragmentTransaction.commit();
+		}
+	}
+	   /*
+     * android:id/tabcontent のダミーコンテンツ
+     */
+    private static class DummyTabFactory implements TabContentFactory {
+
+        /* Context */
+        private final Context mContext;
+
+        DummyTabFactory(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public View createTabContent(String tag) {
+            View v = new View(mContext);
+            return v;
+        }
+    }
 //////////////////////////////////////////////////////////////////
     /**
      * アプリケーションを初期化します
@@ -77,9 +132,10 @@ public class MainActivity extends Activity {
     	// uuidが端末に残っていなかったら新規登録
     	if (uuid == null || user_id == null) {
     		showEntryDialog();
-    		return;
+    	} else {
+    		setupManager();
+    		onTabChanged("teacher");
     	}
-    	setupDisplay();
     }
 
     /**
@@ -130,7 +186,7 @@ public class MainActivity extends Activity {
 									
 									@Override
 									public void onClick(DialogInterface dialog, int which) {
-										setupDisplay();
+										setupManager();
 									}
 								});
 							} else {
@@ -166,67 +222,6 @@ public class MainActivity extends Activity {
 		});
         alertDialog.show();
     }
-
-    
-    private void setupDisplay() {
-
-		((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.WHITE);
-    	new WebAPI(this).getTeacherList(new APIResponseHandler() {
-
-			@Override
-			public void onRespond(Object result) {
-				Log.d("MainActivity/setupDisplay", result.toString());
-				List<String> urlList = new ArrayList<String>();
-				try {
-					JSONObject json = new JSONObject(result.toString());
-					JSONObject info = json.getJSONObject("info");
-					boolean status = info.getBoolean("status");
-					if (status) {
-						JSONArray list = json.getJSONArray("list");
-						final List<Teacher> teacherList = new ArrayList<Teacher>();
-						for (int i=0; i<list.length(); i++) {
-							JSONObject teacherJson = list.getJSONObject(i);
-							String id = teacherJson.getString("id");
-							String nickname = teacherJson.getString("nickname");
-							String message = teacherJson.getString("message");
-							String url = teacherJson.getString("url");
-							if (url != null) {
-								Log.d("URL", url);
-								urlList.add(url);
-							}
-
-							Teacher teacher = new Teacher();
-							teacher.setId(id);
-							teacher.setNickname(nickname);
-							teacher.setMessage(message);
-							teacher.setUrl(url);
-							teacherList.add(teacher);
-						}
-						GridView gridView = (GridView)findViewById(R.id.gvTeacher);
-				    	gridView.setAdapter(new ImageGridViewAdapter(MainActivity.this, urlList));
-				    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-							@Override
-							public void onItemClick(AdapterView<?> parent,
-									View view, int position, long id) {
-								Teacher teacher = teacherList.get(position);
-								openTimeTable(teacher);
-							}
-						});
-				    	gridView.invalidate();
-				    	Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.motion);
-				    	gridView.setAnimation(animation);
-				    	animation.start();
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-					showDialogMessage("システムエラー", e.getMessage(), null);
-				}
-			}
-    	});
-    	setupManager();
-    }
-
     private void setupManager() {
     	
     	PhoneManager.getInstance().initializeManager(this, "888" + user_id, uuid, new PhoneRegistrationHandler() {
@@ -251,18 +246,11 @@ public class MainActivity extends Activity {
 
     	});
     }
-    private void openTimeTable(Teacher teacher) {
-    	Intent intent = new Intent(this, TimeTableActivity.class);
-    	intent.putExtra("teacher_id", teacher.getId());
-    	intent.putExtra("nickname", teacher.getNickname());
-    	intent.putExtra("message", teacher.getMessage());
-    	intent.putExtra("url", teacher.getUrl());
-    	startActivity(intent);
-    }
+
 	/**
 	 * 読み込み中ダイアログを表示する
 	 */
-	private void showProgress() {
+	public void showProgress() {
 		if (progressDialog == null) {
 			progressDialog = new ProgressDialog(this);
 			progressDialog.setMessage("Now Loading...");
@@ -272,7 +260,7 @@ public class MainActivity extends Activity {
 	/**
 	 * 読み込み中ダイアログを非表示にする
 	 */
-	private void hideProgress() {
+	public void hideProgress() {
 		if (progressDialog != null && progressDialog.isShowing()) {
 			progressDialog.dismiss();
 		}
@@ -282,7 +270,7 @@ public class MainActivity extends Activity {
 	 * @param message エラーメッセージ
 	 * @param listener OKを押したときのハンドラ
 	 */
-	private void showDialogMessage(String title, String message, DialogInterface.OnClickListener listener) {
+	public void showDialogMessage(String title, String message, DialogInterface.OnClickListener listener) {
 		if (errorDialog == null) {
 			errorDialog = new AlertDialog.Builder(this);
 		}
@@ -290,51 +278,5 @@ public class MainActivity extends Activity {
 		errorDialog.setMessage(message);
 		errorDialog.setPositiveButton("OK", listener);
 		errorDialog.show();
-	}
-	
-	private class Teacher {
-		private String id;
-		private String uuid;
-		private String email;
-		private String nickname;
-		private String url;
-		private String message;
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
-		public String getUuid() {
-			return uuid;
-		}
-		public void setUuid(String uuid) {
-			this.uuid = uuid;
-		}
-		public String getEmail() {
-			return email;
-		}
-		public void setEmail(String email) {
-			this.email = email;
-		}
-		public String getNickname() {
-			return nickname;
-		}
-		public void setNickname(String nickname) {
-			this.nickname = nickname;
-		}
-		public String getUrl() {
-			return url;
-		}
-		public void setUrl(String url) {
-			this.url = url;
-		}
-		public String getMessage() {
-			return message;
-		}
-		public void setMessage(String message) {
-			this.message = message;
-		}
-		
 	}
 }
