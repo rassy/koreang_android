@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,26 +53,30 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup();        
 
-        /* Tab1 設定 */
-        TabSpec tab1 = mTabHost.newTabSpec("teacher");
-        tab1.setIndicator("キャスト");                  
-        tab1.setContent(new DummyTabFactory(this)); 
-        mTabHost.addTab(tab1);                      
+        TabSpec tabTeacher = mTabHost.newTabSpec("teacher");
+        tabTeacher.setIndicator("キャスト", getResources().getDrawable(R.drawable.ic_teacher));                  
+        tabTeacher.setContent(new DummyTabFactory(this)); 
+        mTabHost.addTab(tabTeacher);                      
 
-        // Tab2 設定
-        TabSpec tab2 = mTabHost.newTabSpec("reservation");
-        tab2.setIndicator("予約一覧");                  
-        tab2.setContent(new DummyTabFactory(this)); 
-        mTabHost.addTab(tab2);         
+        TabSpec tagReservation = mTabHost.newTabSpec("reservation");
+        tagReservation.setIndicator("予約一覧", getResources().getDrawable(R.drawable.ic_list));                  
+        tagReservation.setContent(new DummyTabFactory(this)); 
+        mTabHost.addTab(tagReservation);         
         
-        TabSpec tab3 = mTabHost.newTabSpec("profile");
-        tab3.setIndicator("プロフィール設定");
-        tab3.setContent(new DummyTabFactory(this));
-        mTabHost.addTab(tab3);
+        TabSpec tabFavorite = mTabHost.newTabSpec("favorite");
+        tabFavorite.setIndicator("お気に入り", getResources().getDrawable(R.drawable.ic_favorite));
+        tabFavorite.setContent(new DummyTabFactory(this));
+        mTabHost.addTab(tabFavorite);
+        
+        TabSpec tabProfile = mTabHost.newTabSpec("profile");
+        tabProfile.setIndicator("プロフィール", getResources().getDrawable(R.drawable.ic_profile));
+        tabProfile.setContent(new DummyTabFactory(this));
+        mTabHost.addTab(tabProfile);
         
         mTabHost.setOnTabChangedListener(this);
         
         commonUtils = new CommonUtils(this);
+        
         initializeApplication();
     }
     @Override
@@ -97,6 +102,8 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 				fragmentTransaction.replace(R.id.realtabcontent, new TeacherListFragment());
 			} else if ("reservation".equals(tabId)) {
 				fragmentTransaction.replace(R.id.realtabcontent, new ReservationListFragment());
+			} else if ("favorite".equals(tabId)) {
+				fragmentTransaction.replace(R.id.realtabcontent, new FavoriteListFragment());
 			} else if ("profile".equals(tabId)) {
 				fragmentTransaction.replace(R.id.realtabcontent, new ProfileFragment());
 			}

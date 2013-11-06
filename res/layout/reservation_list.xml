@@ -14,12 +14,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-   		<TextView
-   		    android:id="@+id/textView1"
-   		    android:layout_width="wrap_content"
-   		    android:layout_height="wrap_content"
-   		    android:text="予約一覧" />
-
         <ListView
             android:id="@+id/listReservation"
             android:layout_width="match_parent"

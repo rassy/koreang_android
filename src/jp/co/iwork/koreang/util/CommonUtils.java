@@ -4,6 +4,7 @@ import static jp.co.iworks.koreang.Const.BASE_URL;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 
 /**
  * ユーティリティークラス
@@ -21,6 +23,8 @@ public class CommonUtils {
 	// コンテキスト
 	private Context mContext;
 	private AlertDialog.Builder errorDialog;
+	
+	public static Map<String, Bitmap> bitmapCache = new HashMap<String, Bitmap>();
 	/**
 	 * コンストラクタ
 	 * @param context
