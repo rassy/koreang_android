@@ -130,10 +130,6 @@ public class PhoneManager {
     public void startTalk() throws SipException {
 		call.answerCall(30);
         call.startAudio();
-        //call.setSpeakerMode(true);
-        if(call.isMuted()) {
-            call.toggleMute();
-        }
     }
     public void endTalk() throws SipException {
     	call.endCall();
