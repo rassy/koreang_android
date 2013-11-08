@@ -138,7 +138,7 @@ public class ReservationListFragment extends Fragment {
 				view = this.inflater.inflate(this.layout, null);
 			}
 			final Reservation reservation = this.timeTables.get(position);
-			((TextView)view.findViewById(R.id.txtTitle)).setText(reservation.getTimeFrom());
+			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(reservation.getTimeFrom());
 			((TextView)view.findViewById(R.id.txtNickname)).setText(reservation.getNickname());
 			((Button)view.findViewById(R.id.btnReservationCancel)).setOnClickListener(new View.OnClickListener() {
 

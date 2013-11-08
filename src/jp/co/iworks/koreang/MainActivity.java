@@ -236,19 +236,19 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 			@Override
 			public void onRegistering(String localProfileUri) {
 				Log.d(this.toString(), "SIP Registering. localProfileUri="+localProfileUri);
-				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.YELLOW);
+				((TextView)findViewById(R.id.txtTimeFrom)).setTextColor(Color.YELLOW);
 			}
 
 			@Override
 			public void onRegistrationDone(String localProfileUri, long expiryTime) {
 				Log.d(this.toString(), "SIP Registration finished. localProfileUri="+localProfileUri);
-				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.GREEN);
+				((TextView)findViewById(R.id.txtTimeFrom)).setTextColor(Color.GREEN);
 			}
 
 			@Override
 			public void onRegistrationFailed(String localProfileUri, int errorCode, String errorMessage) {
 				Log.e(this.toString(), "SIP Registration failed. localProfileUri="+localProfileUri+",errorCode="+errorCode+",message="+errorMessage);
-				((TextView)findViewById(R.id.txtTitle)).setTextColor(Color.RED);
+				((TextView)findViewById(R.id.txtTimeFrom)).setTextColor(Color.RED);
 			}
 
     	});

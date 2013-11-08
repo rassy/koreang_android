@@ -1,8 +1,11 @@
 package jp.co.iworks.koreang;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import jp.co.iworks.koreang.web.WebAPI;
 
@@ -170,8 +173,19 @@ public class TimeTableActivity extends Activity {
 			String time_table_id = data.getString("id");
 			String start_date = data.getString("start_date");
 			String end_date = data.getString("end_date");
+			String price = data.getString("price");
 			boolean available = data.getBoolean("available");
-			adapter.add(new TimeTable(time_table_id, start_date, end_date, available));
+			try {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.JAPAN);
+				Date date = dateFormat.parse(targetDate + " " + start_date);
+				if (date.before(new Date())) {
+					available = false;
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+				available = false;
+			}
+			adapter.add(new TimeTable(time_table_id, start_date, end_date, available, price));
 		}
 	}
 	private class TimeTable {
@@ -179,12 +193,14 @@ public class TimeTableActivity extends Activity {
 		private String timeFrom;
 		private String timeTo;
 		private boolean canReserve;
+		private String price;
 		
-		public TimeTable(String id, String timeFrom, String timeTo, boolean canReserve) {
+		public TimeTable(String id, String timeFrom, String timeTo, boolean canReserve, String price) {
 			this.id = id;
 			this.timeFrom = timeFrom;
 			this.timeTo = timeTo;
 			this.canReserve = canReserve;
+			this.price = price;
 		}
 		public String getId() {
 			return this.id;
@@ -194,6 +210,9 @@ public class TimeTableActivity extends Activity {
 		}
 		public String getTimeTo() {
 			return this.timeTo;
+		}
+		public String getPrice() {
+			return this.price;
 		}
 	}
 	private class TimeTableAdapter extends ArrayAdapter<TimeTable> {
@@ -218,67 +237,85 @@ public class TimeTableActivity extends Activity {
 				view = this.inflater.inflate(this.layout, null);
 			}
 			final TimeTable timeTable = this.timeTables.get(position);
-			((TextView)view.findViewById(R.id.txtTitle)).setText(timeTable.getTimeFrom());
+			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(timeTable.getTimeFrom());
 			((TextView)view.findViewById(R.id.txtTimeTo)).setText(timeTable.getTimeTo());
 			Button btnReserve = (Button)view.findViewById(R.id.btnReserve);
 			btnReserve.setOnClickListener(new View.OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
-					Log.d("TimeTableActivity/btnReserce.onclick", timeTable.getId() + ":" + timeTable.getTimeFrom() + " - " + timeTable.getTimeTo());
-					showProgress();
-					new WebAPI(TimeTableActivity.this).postReservation(teacher_id, timeTable.getId(), targetDate, new APIResponseHandler() {
-
+					AlertDialog.Builder confirm = new AlertDialog.Builder(TimeTableActivity.this);
+					confirm.setTitle("確認");
+					confirm.setMessage("通話が開始される際に" + timeTable.getPrice() + "pt消費されます。\n予約しても宜しいですか？");
+					confirm.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						
 						@Override
-						public void onRespond(Object result) {
-							hideProgress();
-							
-							AlertDialog.Builder alert = new AlertDialog.Builder(TimeTableActivity.this);
-							try {
-								JSONObject json = new JSONObject(result.toString());
-								boolean status = json.getJSONObject("result").getJSONObject("info").getBoolean("status");
-								if (status) {
-									alert.setTitle("完了");
-									alert.setMessage("予約が正常に完了しました。");
-									alert.setPositiveButton("OK", new OnClickListener() {
-
-										@Override
-										public void onClick(
-												DialogInterface dialog,
-												int which) {
-											refreshData();
-										}
-										
-									});
-								} else {
-									alert.setTitle("失敗");
-									alert.setMessage("既に予約されているため予約出来ませんでした。");
-									alert.setPositiveButton("OK", new OnClickListener() {
-
-										@Override
-										public void onClick(
-												DialogInterface dialog,
-												int which) {
-											refreshData();
-										}
-									});
-								}
-								alert.show();
-							} catch (JSONException e) {
-								e.printStackTrace();
-							}
+						public void onClick(DialogInterface dialog, int which) {
+							return;
 						}
 					});
+					confirm.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							registReservation(timeTable, targetDate);
+						}
+					});
+					confirm.show();
 				}
 			});
 			btnReserve.setEnabled(timeTable.canReserve);
 			if (timeTable.canReserve) {
-				btnReserve.setText("予約");
+				btnReserve.setText(timeTable.getPrice().toString() + "pt");
 			} else {
 				btnReserve.setText("×");
 			}
 			return view;
 		}
+	}
+	private void registReservation(final TimeTable timeTable, String targetDate) {
+		showProgress();
+		new WebAPI(TimeTableActivity.this).postReservation(teacher_id, timeTable.getId(), targetDate, timeTable.getPrice(), new APIResponseHandler() {
+
+			@Override
+			public void onRespond(Object result) {
+				hideProgress();
+				
+				AlertDialog.Builder alert = new AlertDialog.Builder(TimeTableActivity.this);
+				try {
+					JSONObject json = new JSONObject(result.toString());
+					boolean status = json.getJSONObject("result").getJSONObject("info").getBoolean("status");
+					if (status) {
+						alert.setTitle("完了");
+						alert.setMessage("予約が正常に完了しました。");
+						alert.setPositiveButton("OK", new OnClickListener() {
+
+							@Override
+							public void onClick(
+									DialogInterface dialog,
+									int which) {
+								refreshData();
+							}					
+						});
+					} else {
+						alert.setTitle("失敗");
+						alert.setMessage("既に予約されているため予約出来ませんでした。");
+						alert.setPositiveButton("OK", new OnClickListener() {
+
+							@Override
+							public void onClick(
+									DialogInterface dialog,
+									int which) {
+								refreshData();
+							}
+						});
+					}
+					alert.show();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 	private void showProgress() {
 		if (progressDialog == null) {

@@ -77,11 +77,12 @@ public class WebAPI {
 			
 		});
 	}
-	public void postReservation(String teacherId, String timeTableId, String targetDate, final APIResponseHandler handler) {
+	public void postReservation(String teacherId, String timeTableId, String targetDate, String price, final APIResponseHandler handler) {
 		List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
 		parameters.add(new BasicNameValuePair("teacher_id", teacherId));
 		parameters.add(new BasicNameValuePair("time_table_id", timeTableId));
 		parameters.add(new BasicNameValuePair("target_date", targetDate));
+		parameters.add(new BasicNameValuePair("price", price));
 		new HttpRequest(mContext).post(CommonUtils.getUrl(URL_RESERVATION_REGIST), parameters, new HttpResponseHandler(){
 
 			@Override

@@ -105,6 +105,7 @@ public class HttpRequest {
 					mainHandler.post(new Runnable(){
 						@Override
 						public void run() {
+							Log.d(this.toString(), result);
 							handler.onSuccess(result);		
 						}
 					});
