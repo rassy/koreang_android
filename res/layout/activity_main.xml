@@ -9,7 +9,7 @@
    	    android:layout_width="match_parent"
     	android:layout_height="match_parent">
    	    
-	    <LinearLayout
+	    <RelativeLayout
 	        android:orientation="vertical"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent">
@@ -17,17 +17,21 @@
 	            android:id="@android:id/tabs"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
+	            android:layout_alignParentBottom="true"
 	            />
 	        <FrameLayout
 	            android:id="@android:id/tabcontent"
 	            android:layout_width="0dp"
 	            android:layout_height="0dp"
+	            android:layout_alignParentTop="true"
+	            android:layout_above="@android:id/tabs"
 	            />
 	        <FrameLayout
 	            android:id="@+id/realtabcontent"
 	            android:layout_width="match_parent"
 	            android:layout_height="match_parent"
+	            android:layout_above="@android:id/tabs"
 	            />
-	  	    </LinearLayout>
+	  	    </RelativeLayout>
 	</TabHost>
 </LinearLayout>

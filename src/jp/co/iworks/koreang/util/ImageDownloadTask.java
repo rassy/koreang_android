@@ -1,10 +1,9 @@
-package jp.co.iworks.koreang;
+package jp.co.iworks.koreang.util;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
 
-import jp.co.iwork.koreang.util.CommonUtils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

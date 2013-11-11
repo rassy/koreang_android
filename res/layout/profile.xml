@@ -1,13 +1,372 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent">
+	<include 
+	    layout="@layout/titlebar"
+	    android:id="@+id/profile_title_bar" />
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
+	<!-- プロフィール写真 -->
+	<jp.co.iworks.koreang.util.RoundedCornerImageView
+	    android:id="@+id/iv_profile"
+	    android:layout_width="90dp"
+	    android:layout_height="120dp"
+	    android:layout_below="@id/profile_title_bar"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginTop="10dp" />
+	<!-- 予約ボタン -->
+	<Button
+        android:id="@+id/btnOpenTimeTable"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="作成中" />
-
-</LinearLayout>
+        android:text="@string/btn_open_timetable_title"
+        android:textColor="@color/white"
+        android:background="@drawable/button_design"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_toRightOf="@id/iv_profile"
+        android:layout_below="@id/profile_title_bar" />
+	<!-- お気に入り追加ボタン -->
+	<Button
+        android:id="@+id/btnAddFavorite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_add_favorite_title"
+        android:textColor="@color/white"
+        android:background="@drawable/button_design"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_toRightOf="@id/iv_profile"
+        android:layout_below="@id/btnOpenTimeTable" />
+	<View
+	    android:id="@+id/viewBorder"
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:layout_below="@id/iv_profile"
+	    android:background="@color/border"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="10dp"
+	    android:layout_marginTop="10dp" />
+	<ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="20dp"
+        android:layout_below="@id/viewBorder">
+	<LinearLayout
+		    android:id="@+id/layoutNickName"
+		    android:orientation="vertical"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="20dp">
+			<!-- 名前 -->
+			<TextView
+			    android:id="@+id/lblProfileNickName"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			   	android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="名前" />
+			<TextView
+			   	android:id="@+id/txtProfileNickName"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="ファン" />
+			<!-- 誕生日 -->
+			<TextView
+			    android:id="@+id/lblBirthday"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			   	android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="誕生日" />
+			<TextView
+			   	android:id="@+id/txtBirthday"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="7月10日" />
+			<!-- 身長 -->
+			<TextView
+			    android:id="@+id/lblHeight"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="身長" />
+			<TextView
+			   	android:id="@+id/txtHeight"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="179cm" />
+			<!-- 血液型 -->
+			<TextView
+			    android:id="@+id/lblBlood"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="血液型" />
+			<TextView
+			   	android:id="@+id/txtBlood"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="B型" />
+			<!-- 家族構成 -->
+			<TextView
+			    android:id="@+id/lblFamily"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="家族構成" />
+			<TextView
+			   	android:id="@+id/txtFamily"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="父・母・妹" />
+			<!-- 好きなタイプ -->
+			<TextView
+			    android:id="@+id/lblLikeType"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="好きなタイプ" />
+			<TextView
+			   	android:id="@+id/txtLikeType"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="一緒に居て癒される人" />
+			<!-- マイブーム -->
+			<TextView
+			    android:id="@+id/lblMyBoom"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="マイブーム" />
+			<TextView
+			   	android:id="@+id/txtMyBoom"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="料理作り♪\n最近、料理教室に通い始めました。ぜひ良かったら、簡単に作れるおススメレシピ教えて下さい。" />
+			<!-- 好きな食べ物 -->
+			<TextView
+			    android:id="@+id/lblLikeFood"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="好きな食べ物" />
+			<TextView
+			   	android:id="@+id/txtLikeFood"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="된장찌개(ﾃﾞﾝｼﾞｬﾝﾁｹﾞ)、カレー、パフェㅎㅎㅎ" />			
+			<!-- 似ている芸能人 -->
+			<TextView
+			    android:id="@+id/lblLookLike"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="似ている芸能人" />
+			<TextView
+			   	android:id="@+id/txtLookLike"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="ＴＯＰ(BigBang)に似ているとよく言われます(*/□＼*)" />
+			<!-- あだ名 -->
+			<TextView
+			    android:id="@+id/lblAdana"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="あだ名" />
+			<TextView
+			   	android:id="@+id/txtAdana"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="マッシュルーム。\n中学生の時、マッシュルームみたいな髪型で登校していた為。。。(〃_ _)σ∥" />
+			<!-- 好きな映画・ドラマ -->
+			<TextView
+			    android:id="@+id/lblLikeMovie"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="好きな映画・ドラマ" />
+			<TextView
+			   	android:id="@+id/txtLikeMovie"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="내 머리 속에 지우게(私の頭の中の消しゴム)" />
+			<!-- 好きなシーンetc. -->
+			<TextView
+			    android:id="@+id/lblLikeMovieScene"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="(好きなシーンetc.)" />
+			<TextView
+			   	android:id="@+id/txtLikeMovieScene"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="いつも一人で見て泣いてます。そして손예진も好きな女優さんの一人～\n特に好きなシーンは、バッティングセンターで病気の事を打ち明ける所！！" />
+			<!-- 好きな女性のしぐさ -->
+			<TextView
+			    android:id="@+id/lblLikeShigusa"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="好きな女性のしぐさ" />
+			<TextView
+			   	android:id="@+id/txtLikeShigusa"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="遠くをみて考えごとをしている姿♡" />
+			<!-- ストレス解消法は？？？ -->
+			<TextView
+			    android:id="@+id/lblStress"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="ストレス解消法は？？？" />
+			<TextView
+			   	android:id="@+id/txtStress"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="カラオケ！！！\nとにかく歌うことが大好きです。いつも歌うのはバラード系です。" />
+			<!-- 何フェチですか？？ -->
+			<TextView
+			    android:id="@+id/lblFetch"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="何フェチですか？？" />
+			<TextView
+			   	android:id="@+id/txtFetch"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="手" />
+			<!-- SorM？？ -->
+			<TextView
+			    android:id="@+id/lblSM"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="S or M ？？" />
+			<TextView
+			   	android:id="@+id/txtSM"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="Sかなぁ・・・" />
+			<!-- 最後に一言 -->
+			<TextView
+			    android:id="@+id/lblMessage"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="10dp"
+			    android:layout_marginLeft="10dp"
+			    android:textColor="@color/header_color"
+			    android:textSize="12sp"
+			    android:text="最後に一言" />
+			<TextView
+			   	android:id="@+id/txtMessage"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="5dp"
+			    android:layout_marginLeft="20dp"
+			    android:textSize="16sp"
+			    android:text="高校生の時から日本が大好きで独学で日本語を勉強しています。そして今、大好きな日本で韓国語を教える仕事が出来てとても嬉しいです♪みなさん、僕と一緒に楽しく勉強しましょうㅋㅋㅋ아자 아자 화이팅～！！" />													
+		</LinearLayout>
+	</ScrollView>
+</RelativeLayout>

@@ -1,12 +1,15 @@
 package jp.co.iworks.koreang;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
+import jp.co.iworks.koreang.util.CalendarView;
+import jp.co.iworks.koreang.web.APIResponseHandler;
 import jp.co.iworks.koreang.web.WebAPI;
 
 import org.json.JSONArray;
@@ -20,30 +23,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class TimeTableActivity extends Activity {
 
 	private String teacher_id;
-	private JSONArray timeList = null;
-	private String targetDate;
-	private int currentIndex;
-	private static Drawable next;
-	private static Drawable next_push;
-	private static Drawable back;
-	private static Drawable back_push;
+	private Map<String, JSONArray> timeList = new HashMap<String, JSONArray>();
 	private ProgressDialog progressDialog;
 	
 	@Override
@@ -55,85 +48,25 @@ public class TimeTableActivity extends Activity {
 	}
 	
 	private void setupDisplay() {
-		currentIndex = 0;
-		next = getResources().getDrawable(R.drawable.next);
-		next_push = getResources().getDrawable(R.drawable.next_push);
-		back = getResources().getDrawable(R.drawable.back);
-		back_push = getResources().getDrawable(R.drawable.back_push);
-		
 		Intent intent = getIntent();
 		teacher_id = intent.getStringExtra("teacher_id");
-		String nickname = intent.getStringExtra("nickname");
-		TextView txtTeacherName = (TextView)findViewById(R.id.txtTeacherName);
-		txtTeacherName.setText(nickname);
 		
-		ImageView ivTeacher = (ImageView)findViewById(R.id.ivTeacher);
-		String url = intent.getStringExtra("url");
-		new ImageDownloadTask(ivTeacher, url).execute();
-		
-		String message = intent.getStringExtra("message");
-		message = message.replace("\\n", "\n");
-		TextView txtTeacherMessage = (TextView)findViewById(R.id.txtTeacherMessage);
-		txtTeacherMessage.setText(message);
-		
-		TextView txtTicketBalance = (TextView)findViewById(R.id.txtTicketBalance);
-		txtTicketBalance.setText("チケット残高　1,000pt.");
-		
-		final ImageButton btnNext = (ImageButton)findViewById(R.id.btnNext);
-		btnNext.setOnClickListener(new View.OnClickListener() {
+		CalendarView calendarView = (CalendarView)findViewById(R.id.calendarView1);
+		calendarView.setOnClickListener(new CalendarView.OnClickListener() {
 			
 			@Override
-			public void onClick(View v) {
-				if (currentIndex<6) {
-					currentIndex++;
-					try {
-						setListViewByIndex(currentIndex);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		btnNext.setOnTouchListener(new View.OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					btnNext.setBackgroundDrawable(next_push);
-				} else if (event.getAction() == MotionEvent.ACTION_UP) {
-					btnNext.setBackgroundDrawable(next);
-				}
-				return false;
-			}
-		});
-		final ImageButton btnPrevious = (ImageButton)findViewById(R.id.btnPrevious);
-		btnPrevious.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				if (currentIndex > 0) {
-					currentIndex--;
-					try {
-						setListViewByIndex(currentIndex);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		btnPrevious.setOnTouchListener(new View.OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					btnPrevious.setBackgroundDrawable(back_push);
-				} else if (event.getAction() == MotionEvent.ACTION_UP) {
-					btnPrevious.setBackgroundDrawable(back);
-				}
-				return false;
-			}
-		});
+			public void onClick(Button button, Calendar calendar) {
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
+					String target = sdf.format(calendar.getTime());
+					setListViewByTargetDate(target);
 
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
 		refreshData();
 	}
 	private void refreshData() {
@@ -146,57 +79,50 @@ public class TimeTableActivity extends Activity {
 					JSONObject info = json.getJSONObject("result").getJSONObject("info");
 					boolean status = info.getBoolean("status");
 					if (status) {
-						timeList = json.getJSONObject("result").getJSONArray("list");
+						JSONArray list = json.getJSONObject("result").getJSONArray("list");
+						for (int i=0; i<list.length(); i++) {
+							String targetDate = list.getJSONObject(i).getString("target_date");
+							JSONArray availableList = list.getJSONObject(i).getJSONArray("list");
+							timeList.put(targetDate, availableList);
+						}
 					}
-					setListViewByIndex(currentIndex);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
+					String today = sdf.format(new Date());
+					setListViewByTargetDate(today);
 				} catch(JSONException e) {
 					e.printStackTrace();
 				}
 			}
-			
 		});
 	}
-	private void setListViewByIndex(int index)  throws JSONException {
-		JSONObject results = timeList.getJSONObject(index);
-		targetDate = results.getString("date");
-		TextView txtTargetDate = (TextView)findViewById(R.id.txtTargetDate);
-		txtTargetDate.setText(targetDate);
+	private void setListViewByTargetDate(String targetDate)  throws JSONException {
+		JSONArray results = timeList.get(targetDate);
 		
 		ListView listView = (ListView)findViewById(R.id.listTime);
 		ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.time_table_list_row);
 		listView.setAdapter(adapter);
-
-		JSONArray list = results.getJSONArray("list");
 			
-		for (int i=0; i<list.length(); i++) {
-			JSONObject data = list.getJSONObject(i);
-			String time_table_id = data.getString("id");
+		for (int i=0; i<results.length(); i++) {
+			JSONObject data = results.getJSONObject(i);
+			String time_table_id = data.getString("time_table_id");
 			String start_date = data.getString("start_date");
 			String end_date = data.getString("end_date");
 			String price = data.getString("price");
 			boolean available = data.getBoolean("available");
-			try {
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.JAPAN);
-				Date date = dateFormat.parse(targetDate + " " + start_date);
-				if (date.before(new Date())) {
-					available = false;
-				}
-			} catch (ParseException e) {
-				e.printStackTrace();
-				available = false;
-			}
-			adapter.add(new TimeTable(time_table_id, start_date, end_date, available, price));
+			adapter.add(new TimeTable(time_table_id, targetDate, start_date, end_date, available, price));
 		}
 	}
 	private class TimeTable {
 		private String id;
+		private String targetDate;
 		private String timeFrom;
 		private String timeTo;
 		private boolean canReserve;
 		private String price;
 		
-		public TimeTable(String id, String timeFrom, String timeTo, boolean canReserve, String price) {
+		public TimeTable(String id, String targetDate, String timeFrom, String timeTo, boolean canReserve, String price) {
 			this.id = id;
+			this.targetDate = targetDate;
 			this.timeFrom = timeFrom;
 			this.timeTo = timeTo;
 			this.canReserve = canReserve;
@@ -204,6 +130,9 @@ public class TimeTableActivity extends Activity {
 		}
 		public String getId() {
 			return this.id;
+		}
+		public String getTargetDate() {
+			return this.targetDate;
 		}
 		public String getTimeFrom() {
 			return this.timeFrom;
@@ -258,7 +187,7 @@ public class TimeTableActivity extends Activity {
 						
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							registReservation(timeTable, targetDate);
+							registReservation(timeTable);
 						}
 					});
 					confirm.show();
@@ -266,16 +195,16 @@ public class TimeTableActivity extends Activity {
 			});
 			btnReserve.setEnabled(timeTable.canReserve);
 			if (timeTable.canReserve) {
-				btnReserve.setText(timeTable.getPrice().toString() + "pt");
+				btnReserve.setText(timeTable.getPrice().toString() + "pt で予約");
 			} else {
-				btnReserve.setText("×");
+				btnReserve.setText("予約済み");
 			}
 			return view;
 		}
 	}
-	private void registReservation(final TimeTable timeTable, String targetDate) {
+	private void registReservation(final TimeTable timeTable) {
 		showProgress();
-		new WebAPI(TimeTableActivity.this).postReservation(teacher_id, timeTable.getId(), targetDate, timeTable.getPrice(), new APIResponseHandler() {
+		new WebAPI(TimeTableActivity.this).postReservation(teacher_id, timeTable.getId(), timeTable.getTargetDate(), timeTable.getPrice(), new APIResponseHandler() {
 
 			@Override
 			public void onRespond(Object result) {

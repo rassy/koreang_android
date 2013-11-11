@@ -20,18 +20,27 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.NoTitleBar" >
+        android:theme="@android:style/Theme.Light.NoTitleBar" >
         <activity
-            android:name="jp.co.iworks.koreang.MainActivity"
+            android:name="jp.co.iworks.koreang.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="jp.co.iworks.koreang.web.WebViewActivity" android:screenOrientation="portrait" />
+        <activity
+            android:name="jp.co.iworks.koreang.RegisterActivity" 
+            android:screenOrientation="portrait" 
+            android:launchMode="singleTop"/>
+        <activity 
+            android:name="jp.co.iworks.koreang.MainActivity" 
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop" />
+        <activity android:name="jp.co.iworks.koreang.TeacherProfileActivity" android:screenOrientation="portrait" />
         <activity android:name="jp.co.iworks.koreang.TimeTableActivity" android:screenOrientation="portrait" />
         <activity android:name="jp.co.iworks.koreang.phone.PhoneTalkActivity" android:screenOrientation="portrait" />
         <receiver android:name="jp.co.iworks.koreang.phone.PhoneCallReceiver" android:label="Call Receiver"/>

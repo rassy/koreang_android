@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">韓流(生徒用)</string>
-    <string name="action_settings">Settings</string>
-    <string name="navi_home">ホーム</string>
-    <string name="navi_ticket">チケット</string>
-    <string name="navi_reservation">予約</string>
-    <string name="navi_config">設定</string>
-    <string name="imageDescription">写真</string>
-
+	<string name="format_month_year">yyyy年MM月</string>
+    <string name="app_name">韓流語学アプリ</string>
+    <string name="imageDescription">picture</string>
+    <string name="init_message">韓流語学アプリ</string>
+    <string name="company_name">© DECO Japan Co.,Ltd.</string>
+    <string name="register_message">ようこそ韓流アプリへ\n最初にあなたのお名前を入力して下さい</string>
+	<string name="btnRegister_title">登録する</string>
+	<string name="btn_open_timetable_title">予定を確認する</string>
+	<string name="btn_add_favorite_title">お気に入りに追加する</string>
 </resources>

@@ -9,10 +9,14 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp">
 
-   	<LinearLayout
+    <jp.co.iworks.koreang.util.CalendarView
+        android:id="@+id/calendar_reservation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp" />
 
         <ListView
             android:id="@+id/listReservation"
@@ -21,6 +25,5 @@
             android:layout_marginTop="20dp" >
 
         </ListView>
-    </LinearLayout>
 
 </LinearLayout>

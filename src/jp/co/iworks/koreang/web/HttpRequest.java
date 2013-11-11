@@ -8,7 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
-import jp.co.iwork.koreang.util.CommonUtils;
+import jp.co.iworks.koreang.util.CommonUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

@@ -3,6 +3,9 @@ package jp.co.iworks.koreang;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.co.iworks.koreang.dto.Teacher;
+import jp.co.iworks.koreang.util.ImageGridViewAdapter;
+import jp.co.iworks.koreang.web.APIResponseHandler;
 import jp.co.iworks.koreang.web.WebAPI;
 
 import org.json.JSONArray;
@@ -12,15 +15,17 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+/**
+ * 先生一覧表示画面
+ * @author tryumura
+ *
+ */
 public class TeacherListFragment extends Fragment {
 
 	@Override
@@ -30,16 +35,12 @@ public class TeacherListFragment extends Fragment {
 		setupDisplay(view);
 		return view;
 	}
-    private void openTimeTable(Teacher teacher) {
-    	Intent intent = new Intent(getActivity(), TimeTableActivity.class);
+    private void openProfile(Teacher teacher) {
+    	Intent intent = new Intent(getActivity(), TeacherProfileActivity.class);
     	intent.putExtra("teacher_id", teacher.getId());
-    	intent.putExtra("nickname", teacher.getNickname());
-    	intent.putExtra("message", teacher.getMessage());
-    	intent.putExtra("url", teacher.getUrl());
     	startActivity(intent);
     }
     private void setupDisplay(final View view) {
-    	((MainActivity)getActivity()).showProgress();
      	new WebAPI(getActivity()).getTeacherList(new APIResponseHandler() {
 
  			@Override
@@ -55,8 +56,6 @@ public class TeacherListFragment extends Fragment {
  						for (int i=0; i<list.length(); i++) {
  							JSONObject teacherJson = list.getJSONObject(i);
  							String id = teacherJson.getString("id");
- 							String nickname = teacherJson.getString("nickname");
- 							String message = teacherJson.getString("message");
  							String url = teacherJson.getString("url");
  							if (url != null) {
  								urlList.add(url);
@@ -64,13 +63,10 @@ public class TeacherListFragment extends Fragment {
 
  							Teacher teacher = new Teacher();
  							teacher.setId(id);
- 							teacher.setNickname(nickname);
- 							teacher.setMessage(message);
  							teacher.setUrl(url);
  							teacherList.add(teacher);
  						}
 
- 				    	((MainActivity)getActivity()).hideProgress();
  						GridView gridView = (GridView)view.findViewById(R.id.gvTeacher);
  				    	gridView.setAdapter(new ImageGridViewAdapter(getActivity(), urlList));
  				    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -79,66 +75,20 @@ public class TeacherListFragment extends Fragment {
  							public void onItemClick(AdapterView<?> parent,
  									View view, int position, long id) {
  								Teacher teacher = teacherList.get(position);
- 								openTimeTable(teacher);
+ 								openProfile(teacher);
  							}
  						});
  				    	gridView.invalidate();
- 				    	Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.motion);
- 				    	gridView.setAnimation(animation);
- 				    	animation.start();
+// 				    	Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.motion);
+// 				    	gridView.setAnimation(animation);
+// 				    	animation.start();
  					}
  				} catch (JSONException e) {
- 					((MainActivity)getActivity()).hideProgress();
  					e.printStackTrace();
- 					((MainActivity)getActivity()).showDialogMessage("システムエラー", e.getMessage(), null);
  				}
  			}
      	});
      }
 
-	private class Teacher {
-		private String id;
-		private String uuid;
-		private String email;
-		private String nickname;
-		private String url;
-		private String message;
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
-		public String getUuid() {
-			return uuid;
-		}
-		public void setUuid(String uuid) {
-			this.uuid = uuid;
-		}
-		public String getEmail() {
-			return email;
-		}
-		public void setEmail(String email) {
-			this.email = email;
-		}
-		public String getNickname() {
-			return nickname;
-		}
-		public void setNickname(String nickname) {
-			this.nickname = nickname;
-		}
-		public String getUrl() {
-			return url;
-		}
-		public void setUrl(String url) {
-			this.url = url;
-		}
-		public String getMessage() {
-			return message;
-		}
-		public void setMessage(String message) {
-			this.message = message;
-		}
-		
-	}
+
 }

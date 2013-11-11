@@ -1,6 +1,6 @@
 package jp.co.iworks.koreang.web;
 
-import jp.co.iwork.koreang.util.CommonUtils;
+import jp.co.iworks.koreang.util.CommonUtils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;

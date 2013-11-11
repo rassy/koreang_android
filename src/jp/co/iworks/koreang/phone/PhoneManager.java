@@ -2,7 +2,7 @@ package jp.co.iworks.koreang.phone;
 
 import static jp.co.iworks.koreang.Const.SIP_REQUEST_CODE;
 import static jp.co.iworks.koreang.Const.SIP_SERVER;
-import jp.co.iwork.koreang.util.CommonUtils;
+import jp.co.iworks.koreang.util.CommonUtils;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
