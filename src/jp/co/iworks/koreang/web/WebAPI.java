@@ -59,7 +59,6 @@ public class WebAPI {
 				e.printStackTrace();
 				handler.onRespond(e);
 			}
-			
 		});
 	}
 	public void getTeacherById(String teacherId, final APIResponseHandler handler) {
@@ -94,9 +93,10 @@ public class WebAPI {
 			}
 		});
 	}
-	public void getTimeTableList(String teacherId, final APIResponseHandler handler) {
+	public void getTimeTableList(String teacherId, String targetDate, final APIResponseHandler handler) {
 		List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
 		parameters.add(new BasicNameValuePair("teacher_id", teacherId));
+		parameters.add(new BasicNameValuePair("target_date", targetDate));
 		new HttpRequest(mContext).get(CommonUtils.getUrl(URL_TIMETABLE_INDEX), parameters, new HttpResponseHandler(){
 
 			@Override
@@ -129,9 +129,7 @@ public class WebAPI {
 			public void onFailure(Throwable e) {
 				handler.onRespond(e);
 			}
-			
 		});
-				
 	}
 	/**
 	 * 自分の予約一覧を取得する

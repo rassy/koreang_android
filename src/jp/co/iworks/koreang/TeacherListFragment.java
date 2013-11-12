@@ -59,12 +59,11 @@ public class TeacherListFragment extends Fragment {
  							String url = teacherJson.getString("url");
  							if (url != null) {
  								urlList.add(url);
+ 	 							Teacher teacher = new Teacher();
+ 	 							teacher.setId(id);
+ 	 							teacher.setUrl(url);
+ 	 							teacherList.add(teacher);
  							}
-
- 							Teacher teacher = new Teacher();
- 							teacher.setId(id);
- 							teacher.setUrl(url);
- 							teacherList.add(teacher);
  						}
 
  						GridView gridView = (GridView)view.findViewById(R.id.gvTeacher);

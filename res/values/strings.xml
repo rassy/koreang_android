@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="format_month_year">yyyy年MM月</string>
-    <string name="app_name">韓流語学アプリ</string>
+    <string name="app_name">Catch Me</string>
     <string name="imageDescription">picture</string>
-    <string name="init_message">韓流語学アプリ</string>
+    <string name="init_message">Catch Me</string>
     <string name="company_name">© DECO Japan Co.,Ltd.</string>
     <string name="register_message">ようこそ韓流アプリへ\n最初にあなたのお名前を入力して下さい</string>
 	<string name="btnRegister_title">登録する</string>

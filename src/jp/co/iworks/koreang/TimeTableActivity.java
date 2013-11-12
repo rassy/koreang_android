@@ -1,12 +1,11 @@
 package jp.co.iworks.koreang;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import jp.co.iworks.koreang.util.CalendarView;
 import jp.co.iworks.koreang.web.APIResponseHandler;
@@ -23,7 +22,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +34,6 @@ import android.widget.TextView;
 public class TimeTableActivity extends Activity {
 
 	private String teacher_id;
-	private Map<String, JSONArray> timeList = new HashMap<String, JSONArray>();
 	private ProgressDialog progressDialog;
 	
 	@Override
@@ -56,24 +53,25 @@ public class TimeTableActivity extends Activity {
 			
 			@Override
 			public void onClick(Button button, Calendar calendar) {
-				try {
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
-					String target = sdf.format(calendar.getTime());
-					setListViewByTargetDate(target);
-
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
+				String target = sdf.format(calendar.getTime());
+				setTimeTableAdapter(target);
 			}
 		});
-		
-		refreshData();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
+		String target = sdf.format(Calendar.getInstance().getTime());
+		setTimeTableAdapter(target);
 	}
-	private void refreshData() {
-		new WebAPI(this).getTimeTableList(teacher_id, new APIResponseHandler() {
+	private void setTimeTableAdapter(final String targetDate) {
+		ListView listView = (ListView)findViewById(R.id.listTime);
+		final ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.time_table_list_row);
+		listView.setAdapter(adapter);
+
+		new WebAPI(this).getTimeTableList(teacher_id, targetDate, new APIResponseHandler() {
 
 			@Override
 			public void onRespond(Object result) {
+				if (result == null) return;
 				try {
 					JSONObject json = new JSONObject(result.toString());
 					JSONObject info = json.getJSONObject("result").getJSONObject("info");
@@ -81,51 +79,55 @@ public class TimeTableActivity extends Activity {
 					if (status) {
 						JSONArray list = json.getJSONObject("result").getJSONArray("list");
 						for (int i=0; i<list.length(); i++) {
-							String targetDate = list.getJSONObject(i).getString("target_date");
-							JSONArray availableList = list.getJSONObject(i).getJSONArray("list");
-							timeList.put(targetDate, availableList);
+							JSONObject data = list.getJSONObject(i);
+							String time_table_id = data.getString("time_table_id");
+							String start_date = data.getString("start_date");
+							String end_date = data.getString("end_date");
+							boolean available = data.getBoolean("available");
+							boolean reserved = data.getBoolean("reserved");
+							String price = data.getString("price");
+							SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.JAPAN);
+							Date startDate = null;
+							Date endDate = null;
+							try {
+								startDate = formatter.parse(start_date);
+								endDate = formatter.parse(end_date);
+								
+								Date now = Calendar.getInstance().getTime();
+								if (now.after(startDate)) {
+									continue;
+								}
+								
+							} catch (ParseException e) {
+								e.printStackTrace();
+								continue;
+							}
+							adapter.add(new TimeTable(time_table_id, targetDate, startDate, endDate, available, reserved, price));
 						}
 					}
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
-					String today = sdf.format(new Date());
-					setListViewByTargetDate(today);
-				} catch(JSONException e) {
-					e.printStackTrace();
+				} catch (JSONException e) {
+					
 				}
 			}
 		});
 	}
-	private void setListViewByTargetDate(String targetDate)  throws JSONException {
-		JSONArray results = timeList.get(targetDate);
-		
-		ListView listView = (ListView)findViewById(R.id.listTime);
-		ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.time_table_list_row);
-		listView.setAdapter(adapter);
-			
-		for (int i=0; i<results.length(); i++) {
-			JSONObject data = results.getJSONObject(i);
-			String time_table_id = data.getString("time_table_id");
-			String start_date = data.getString("start_date");
-			String end_date = data.getString("end_date");
-			String price = data.getString("price");
-			boolean available = data.getBoolean("available");
-			adapter.add(new TimeTable(time_table_id, targetDate, start_date, end_date, available, price));
-		}
-	}
+
 	private class TimeTable {
 		private String id;
 		private String targetDate;
-		private String timeFrom;
-		private String timeTo;
-		private boolean canReserve;
+		private Date startDate;
+		private Date endDate;
+		private boolean available;
+		private boolean reserved;
 		private String price;
 		
-		public TimeTable(String id, String targetDate, String timeFrom, String timeTo, boolean canReserve, String price) {
+		public TimeTable(String id, String targetDate, Date startDate, Date endDate, boolean available, boolean reserved, String price) {
 			this.id = id;
 			this.targetDate = targetDate;
-			this.timeFrom = timeFrom;
-			this.timeTo = timeTo;
-			this.canReserve = canReserve;
+			this.startDate = startDate;
+			this.endDate = endDate;
+			this.reserved = reserved;
+			this.available = available;
 			this.price = price;
 		}
 		public String getId() {
@@ -134,14 +136,20 @@ public class TimeTableActivity extends Activity {
 		public String getTargetDate() {
 			return this.targetDate;
 		}
-		public String getTimeFrom() {
-			return this.timeFrom;
+		public Date getStartDate() {
+			return this.startDate;
 		}
-		public String getTimeTo() {
-			return this.timeTo;
+		public Date getEndDate() {
+			return this.endDate;
 		}
 		public String getPrice() {
 			return this.price;
+		}
+		public boolean getReserved() {
+			return this.reserved;
+		}
+		public boolean getAvailable() {
+			return this.available;
 		}
 	}
 	private class TimeTableAdapter extends ArrayAdapter<TimeTable> {
@@ -166,8 +174,10 @@ public class TimeTableActivity extends Activity {
 				view = this.inflater.inflate(this.layout, null);
 			}
 			final TimeTable timeTable = this.timeTables.get(position);
-			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(timeTable.getTimeFrom());
-			((TextView)view.findViewById(R.id.txtTimeTo)).setText(timeTable.getTimeTo());
+			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm", Locale.JAPAN);
+
+			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(formatter.format(timeTable.getStartDate()));
+			((TextView)view.findViewById(R.id.txtTimeTo)).setText(formatter.format(timeTable.getEndDate()));
 			Button btnReserve = (Button)view.findViewById(R.id.btnReserve);
 			btnReserve.setOnClickListener(new View.OnClickListener() {
 				
@@ -193,11 +203,17 @@ public class TimeTableActivity extends Activity {
 					confirm.show();
 				}
 			});
-			btnReserve.setEnabled(timeTable.canReserve);
-			if (timeTable.canReserve) {
+			if (!timeTable.getAvailable()) {
+				btnReserve.setText("×");
+				btnReserve.setEnabled(false);
+				return view;
+			}
+			if (!timeTable.getReserved()) {
 				btnReserve.setText(timeTable.getPrice().toString() + "pt で予約");
+				btnReserve.setEnabled(true);
 			} else {
 				btnReserve.setText("予約済み");
+				btnReserve.setEnabled(false);
 			}
 			return view;
 		}
@@ -223,7 +239,7 @@ public class TimeTableActivity extends Activity {
 							public void onClick(
 									DialogInterface dialog,
 									int which) {
-								refreshData();
+								setTimeTableAdapter(timeTable.getTargetDate());
 							}					
 						});
 					} else {
@@ -235,7 +251,7 @@ public class TimeTableActivity extends Activity {
 							public void onClick(
 									DialogInterface dialog,
 									int which) {
-								refreshData();
+								setTimeTableAdapter(timeTable.getTargetDate());
 							}
 						});
 					}

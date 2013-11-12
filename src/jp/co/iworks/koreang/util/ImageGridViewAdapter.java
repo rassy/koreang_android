@@ -3,9 +3,6 @@ package jp.co.iworks.koreang.util;
 import java.util.List;
 
 import jp.co.iworks.koreang.R;
-import jp.co.iworks.koreang.R.id;
-import jp.co.iworks.koreang.R.layout;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
