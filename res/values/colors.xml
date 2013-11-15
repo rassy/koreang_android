@@ -5,10 +5,16 @@
     <color name="button_color2">#2886cc</color>
     <color name="button_color_pressed">#b5d7f0</color>
     <color name="button_color_pressed2">#70bcf5</color>
+    <color name="button_color_red">#f28b8b</color>
+    <color name="button_color_red2">#d84c4c</color>
+    <color name="button_color_red_pressed">#eacece</color>
+    <color name="button_color_red_pressed2">#fc7272</color>
+    
     <color name="button_stroke_color">#cccccc</color>
     <color name="white">#ffffff</color>
     <color name="tab_title_color">#ffffff</color>
     <color name="tab_background_color">#2886cc</color>
     <color name="tab_background_color_selected">#55a8e6</color>
     <color name="border">#cccccc</color>
+    <color name="border2">#303f5c</color>
 </resources>

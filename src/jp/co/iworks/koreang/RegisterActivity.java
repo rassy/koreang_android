@@ -1,12 +1,9 @@
 package jp.co.iworks.koreang;
 
 import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
-
-import java.io.UnsupportedEncodingException;
-
+import static jp.co.iworks.koreang.Const.URL_USER_REGIST;
 import jp.co.iworks.koreang.util.CommonUtils;
-import jp.co.iworks.koreang.web.APIResponseHandler;
-import jp.co.iworks.koreang.web.WebAPI;
+import jp.co.iworks.koreang.web.KoreangHttpClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +16,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 /**
  * ユーザー登録画面
@@ -42,19 +42,15 @@ public class RegisterActivity extends Activity {
 	}
 	
 	// 端末登録ハンドラ
-	private APIResponseHandler userRegistHandler = new APIResponseHandler(){
+	private JsonHttpResponseHandler userRegistHandler = new JsonHttpResponseHandler(){
 		
 		@Override
-		public void onRespond(Object result) {
+		public void onSuccess(JSONObject response) {
+			super.onSuccess(response);
 			hideProgress();
-			if (result == null) {
-				
-			}
-			CommonUtils.LOG(result.toString());
 			try {
-				JSONObject json = new JSONObject(result.toString());
-				JSONObject info = json.getJSONObject("info");
-				JSONObject user = json.getJSONObject("user");
+				JSONObject info = response.getJSONObject("info");
+				JSONObject user = response.getJSONObject("user");
 				boolean status = info.getBoolean("status");
 				if (status) {
 					String user_id = user.getString("id");
@@ -91,14 +87,14 @@ public class RegisterActivity extends Activity {
 				// 入力値
 				String nickName = txtName.getText().toString();
 				// UUID生成
-				that.uuid = commonUtils.getUUID();
+				that.uuid = commonUtils.generateUUID();
 	
+				RequestParams params = new RequestParams();
+				params.put("nickname", nickName);
+				params.put("uuid", uuid);
+				
 				// 端末登録
-				try {
-					new WebAPI(that).registByUuid(nickName, uuid, userRegistHandler);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+				KoreangHttpClient.post(that, URL_USER_REGIST, params, userRegistHandler);
 			}
 		});
 	}

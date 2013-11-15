@@ -1,5 +1,8 @@
 package jp.co.iworks.koreang;
 
+import static jp.co.iworks.koreang.Const.URL_RESERVAION_CANCEL;
+import static jp.co.iworks.koreang.Const.URL_RESERVATION_INDEX_BY_UUID;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,15 +11,13 @@ import java.util.Date;
 import java.util.Locale;
 
 import jp.co.iworks.koreang.util.CalendarView;
-import jp.co.iworks.koreang.web.APIResponseHandler;
-import jp.co.iworks.koreang.web.WebAPI;
+import jp.co.iworks.koreang.web.KoreangHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -29,20 +30,26 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 /**
  * 予約済み一覧
  * @author tryumura
  * @since 2013/10/31
  */
 public class ReservationListFragment extends Fragment {
-
-	private final ReservationListFragment that = this;
-	
+	private View currentView;
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.reservation_list, container, false);
-		CalendarView calendarView = (CalendarView) view.findViewById(R.id.calendar_reservation);
+		currentView = view;
+		setupDisplay();
+		return view;
+	}
+	protected void setupDisplay() {
+		CalendarView calendarView = (CalendarView) currentView.findViewById(R.id.calendar_reservation);
 		final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
 		
 		calendarView.setOnClickListener(new CalendarView.OnClickListener() {
@@ -50,91 +57,83 @@ public class ReservationListFragment extends Fragment {
 			@Override
 			public void onClick(Button button, Calendar calendar) {
 				String targetDate = formatter.format(calendar.getTime());
-				setupDisplay(view, targetDate);
+				setupAdapter(targetDate);
 			}
 		});
-		setupDisplay(view, formatter.format(new Date()));
-		return view;
+		setupAdapter(formatter.format(Calendar.getInstance().getTime()));
 	}
-	protected void setupDisplay(View view, String targetDate) {
-		ListView listView = (ListView)view.findViewById(R.id.listReservation);
+	private void setupAdapter(final String targetDate) {
+		ListView listView = (ListView)currentView.findViewById(R.id.listReservation);
 		final ArrayAdapter<Reservation> adapter = new ReservationAdapter(getActivity(), R.layout.reservation_list_row);
 		listView.setAdapter(adapter);
 
-		new WebAPI(getActivity()).getReservationList(targetDate, new APIResponseHandler(){
+		RequestParams params = new RequestParams();
+		params.add("target_date", targetDate);
+		KoreangHttpClient.get(getActivity(), URL_RESERVATION_INDEX_BY_UUID, params, new JsonHttpResponseHandler(){
 
 			@Override
-			public void onRespond(Object result) {
-				if (result == null) {
-					return;
-				}
+			public void onSuccess(JSONObject response) {
+				super.onSuccess(response);
 				try {
-					JSONObject json = new JSONObject(result.toString());
-					JSONObject info = json.getJSONObject("info");
+					JSONObject info = response.getJSONObject("info");
 					if (info.getBoolean("status")) {
-						JSONArray list = json.getJSONArray("list");
+						JSONArray list = response.getJSONArray("list");
 						for(int i=0; i<list.length(); i++) {
 							String id = list.getJSONObject(i).getString("id");
-							String time_table_id = list.getJSONObject(i).getString("time_table_id");
-							SimpleDateFormat formatterTime = new SimpleDateFormat("HH:mm", Locale.JAPAN);
 							SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.JAPAN);
 							Date startDate = formatterDate.parse(list.getJSONObject(i).getString("start_date"));
-							String start_date = formatterTime.format(startDate);
 							Date endDate = formatterDate.parse(list.getJSONObject(i).getString("end_date"));
-							String end_date = formatterTime.format(endDate);
-							String teacher_id = list.getJSONObject(i).getString("teacher_id");
 							String nickname = list.getJSONObject(i).getString("name");
-							adapter.add(new Reservation(id, time_table_id, teacher_id, nickname, start_date, end_date));
+							
+							Calendar cal = Calendar.getInstance();
+							cal.add(Calendar.MINUTE, 5);
+							Date now = cal.getTime();
+							if (now.after(startDate)) {
+								continue;
+							}
+							adapter.add(new Reservation(id, targetDate, nickname, startDate, endDate));
 						}
 					} else if (info.getInt("code") == 404){
-						//((MainActivity)getActivity()).showDialogMessage("予約なし", "現在予約はありません", null);
-					} else {
-						//((MainActivity)getActivity()).showDialogMessage("エラー", "データが正しく取得できませんでした。", null);
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
-					//((MainActivity)getActivity()).showDialogMessage("エラー", e.getMessage(), null);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}
-
+			
 		});
+
 	}
 
 	private class Reservation {
 		private String id;
-		private String time_table_id;
-		private String teacher_id;
+		private String targetDate;
 		private String nickname;
-		private String timeFrom;
-		private String timeTo;
+		private Date startDate;
+		private Date endDate;
 
-		public Reservation(String id, String time_table_id, String teacher_id, String nickname, String timeFrom, String timeTo) {
+		public Reservation(String id, String targetDate, String nickname, Date startDate, Date endDate) {
 			this.id = id;
-			this.time_table_id = time_table_id;
-			this.teacher_id = teacher_id;
+			this.targetDate = targetDate;
 			this.nickname = nickname;
-			this.timeFrom = timeFrom;
-			this.timeTo = timeTo;
+			this.startDate = startDate;
+			this.endDate = endDate;
 		}
 		public String getId() {
 			return this.id;
 		}
-		public String getTimeTableId() {
-			return this.time_table_id;
-		}
-		public String getTeacherId() {
-			return this.teacher_id;
+		public String getTargetDate() {
+			return this.targetDate;
 		}
 		public String getNickname() {
 			return this.nickname;
 		}
-		public String getTimeFrom() {
-			return this.timeFrom;
+		public Date getStartDate() {
+			return this.startDate;
 		}
-		public String getTimeTo() {
-			return this.timeTo;
+		public Date getEndDate() {
+			return this.endDate;
 		}
 	}
 	private class ReservationAdapter extends ArrayAdapter<Reservation> {
@@ -158,9 +157,10 @@ public class ReservationListFragment extends Fragment {
 			if (convertView == null) {
 				view = this.inflater.inflate(this.layout, null);
 			}
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm", Locale.JAPAN);
 			final Reservation reservation = this.timeTables.get(position);
-			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(reservation.getTimeFrom());
-			((TextView)view.findViewById(R.id.txtTimeTo)).setText(reservation.getTimeTo());
+			((TextView)view.findViewById(R.id.txtTimeFrom)).setText(dateFormatter.format(reservation.getStartDate()));
+			((TextView)view.findViewById(R.id.txtTimeTo)).setText(dateFormatter.format(reservation.getEndDate()));
 			((TextView)view.findViewById(R.id.txtNickname)).setText(reservation.getNickname());
 			((Button)view.findViewById(R.id.btnReservationCancel)).setOnClickListener(new View.OnClickListener() {
 
@@ -173,28 +173,7 @@ public class ReservationListFragment extends Fragment {
 						
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							new WebAPI(getActivity()).postReservationCancel(reservation.getId(), new APIResponseHandler(){
-
-								@Override
-								public void onRespond(Object result) {
-									try {
-										JSONObject json = new JSONObject(result.toString());
-										boolean status = json.getJSONObject("info").getBoolean("status");
-										if (status) {
-//											((MainActivity)getActivity()).showDialogMessage("完了", "キャンセルが完了しました", new DialogInterface.OnClickListener() {
-//												
-//												@Override
-//												public void onClick(DialogInterface arg0, int arg1) {
-//													that.setupDisplay(that.currentView);
-//												}
-//											});
-										}
-									} catch (JSONException e) {
-										e.printStackTrace();
-									}
-								}
-								
-							});
+							cancel(reservation);
 						}
 					});
 					confirm.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -211,6 +190,37 @@ public class ReservationListFragment extends Fragment {
 				}
 			});
 			return view;
+		}
+		private void cancel(final Reservation reservation) {
+			RequestParams params = new RequestParams();
+			params.add("reservation_id", reservation.getId());
+			
+			KoreangHttpClient.post(getActivity(), URL_RESERVAION_CANCEL, params, new JsonHttpResponseHandler(){
+
+				@Override
+				public void onSuccess(JSONObject response) {
+					try {
+						boolean status = response.getJSONObject("info").getBoolean("status");
+						if (status) {
+							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+							builder.setTitle("完了");
+							builder.setMessage("キャンセルが完了しました");
+							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+								
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									setupAdapter(reservation.getTargetDate());
+								}
+							});
+							builder.create().show();
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			});
+
 		}
 	}
 }

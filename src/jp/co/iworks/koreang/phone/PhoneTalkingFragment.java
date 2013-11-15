@@ -14,7 +14,7 @@ public class PhoneTalkingFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.phone_talking, container, false);
+		final View view = inflater.inflate(R.layout.phone_talking, container, false);
 		Button btnEndTalking = (Button)view.findViewById(R.id.btnEndTalking);
 		btnEndTalking.setOnClickListener(new View.OnClickListener() {
 			

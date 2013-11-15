@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
 
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -24,13 +23,7 @@ public class ImageDownloadTask {
 		final Handler mHandler = new Handler();
 		new Thread(new Runnable() {
 			public void run() {
-				// キャッシュから取得してみる
-				bitmap = CommonUtils.bitmapCache.get(url);
-				if (bitmap == null) {
-					// キャッシュになかったら再取得
-					bitmap = getBitmap(url);
-					CommonUtils.bitmapCache.put(url, bitmap);
-				}
+				bitmap = getBitmap(url);
 				if(bitmap == null) return;
 				// ポスト処理
 				mHandler.post(new Runnable() {

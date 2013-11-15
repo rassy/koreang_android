@@ -1,12 +1,13 @@
 package jp.co.iworks.koreang;
 
+import static jp.co.iworks.koreang.Const.URL_TEACHER_INDEX;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.iworks.koreang.dto.Teacher;
 import jp.co.iworks.koreang.util.ImageGridViewAdapter;
-import jp.co.iworks.koreang.web.APIResponseHandler;
-import jp.co.iworks.koreang.web.WebAPI;
+import jp.co.iworks.koreang.web.KoreangHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+
+import com.loopj.android.http.JsonHttpResponseHandler;
 
 /**
  * 先生一覧表示画面
@@ -41,31 +44,30 @@ public class TeacherListFragment extends Fragment {
     	startActivity(intent);
     }
     private void setupDisplay(final View view) {
-     	new WebAPI(getActivity()).getTeacherList(new APIResponseHandler() {
+    	KoreangHttpClient.get(getActivity(), URL_TEACHER_INDEX, null, new JsonHttpResponseHandler(){
 
- 			@Override
- 			public void onRespond(Object result) {
- 				List<String> urlList = new ArrayList<String>();
- 				try {
- 					JSONObject json = new JSONObject(result.toString());
- 					JSONObject info = json.getJSONObject("info");
- 					boolean status = info.getBoolean("status");
- 					if (status) {
- 						JSONArray list = json.getJSONArray("list");
- 						final List<Teacher> teacherList = new ArrayList<Teacher>();
- 						for (int i=0; i<list.length(); i++) {
- 							JSONObject teacherJson = list.getJSONObject(i);
- 							String id = teacherJson.getString("id");
- 							String url = teacherJson.getString("url");
- 							if (url != null) {
- 								urlList.add(url);
- 	 							Teacher teacher = new Teacher();
- 	 							teacher.setId(id);
- 	 							teacher.setUrl(url);
- 	 							teacherList.add(teacher);
- 							}
- 						}
-
+			@Override
+			public void onSuccess(JSONObject response) {
+				super.onSuccess(response);
+				List<String> urlList = new ArrayList<String>();
+				try {
+					JSONObject info = response.getJSONObject("info");
+					boolean status = info.getBoolean("status");
+					if (status) {
+						JSONArray list = response.getJSONArray("list");
+						final List<Teacher> teacherList = new ArrayList<Teacher>();
+						for (int i=0; i<list.length(); i++) {
+							JSONObject teacherJson = list.getJSONObject(i);
+							String id = teacherJson.getString("id");
+							String url = teacherJson.getString("url");
+							if (url != null) {
+								urlList.add(url);
+	 							Teacher teacher = new Teacher();
+	 							teacher.setId(id);
+	 							teacher.setUrl(url);
+	 							teacherList.add(teacher);
+							}
+						}
  						GridView gridView = (GridView)view.findViewById(R.id.gvTeacher);
  				    	gridView.setAdapter(new ImageGridViewAdapter(getActivity(), urlList));
  				    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -78,16 +80,12 @@ public class TeacherListFragment extends Fragment {
  							}
  						});
  				    	gridView.invalidate();
-// 				    	Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.motion);
-// 				    	gridView.setAnimation(animation);
-// 				    	animation.start();
- 					}
- 				} catch (JSONException e) {
- 					e.printStackTrace();
- 				}
- 			}
-     	});
+					}
+				} catch (JSONException e) {
+					
+				}
+			}
+    		
+    	});
      }
-
-
 }

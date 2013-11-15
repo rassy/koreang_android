@@ -1,13 +1,11 @@
 package jp.co.iworks.koreang.util;
 
 import static jp.co.iworks.koreang.Const.BASE_URL;
-import static jp.co.iworks.koreang.Const.BASE_HOST;
-import static jp.co.iworks.koreang.Const.ENV_RELEASE;
 import static jp.co.iworks.koreang.Const.ENV;
+import static jp.co.iworks.koreang.Const.ENV_RELEASE;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,7 +13,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
 import android.util.Log;
 
 /**
@@ -27,8 +24,9 @@ public class CommonUtils {
 	// コンテキスト
 	private Context mContext;
 	private AlertDialog.Builder errorDialog;
+	private static String uuid = null;
+	private static String user_id = null;
 	
-	public static Map<String, Bitmap> bitmapCache = new HashMap<String, Bitmap>();
 	/**
 	 * コンストラクタ
 	 * @param context
@@ -39,6 +37,18 @@ public class CommonUtils {
         errorDialog.setPositiveButton("OK", null);
 	}
 
+	public static void setUuid(String uuid) {
+		CommonUtils.uuid = uuid;
+	}
+	public static void setUserId(String user_id) {
+		CommonUtils.user_id = user_id;
+	}
+	public static String getUuid() {
+		return CommonUtils.uuid;
+	}
+	public static String getUserId() {
+		return CommonUtils.user_id;
+	}
 	public String getSharedPrefsValue(String preferenceName, String key) {
 		SharedPreferences sharedPrefs = mContext.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
 		return sharedPrefs.getString(key, null);
@@ -74,7 +84,7 @@ public class CommonUtils {
     	errorDialog.show();
     }
     
-    public String getUUID() {
+    public String generateUUID() {
     	return UUID.randomUUID().toString();
     }
     public String md5(String s) {

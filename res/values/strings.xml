@@ -9,4 +9,12 @@
 	<string name="btnRegister_title">登録する</string>
 	<string name="btn_open_timetable_title">予定を確認する</string>
 	<string name="btn_add_favorite_title">お気に入りに追加する</string>
+	<string name="ticket_message">チケットを1枚単位から買う事が出来ます。\nご希望枚数の「購入する」ボタンを押して下さい。</string>
+	<string name="phone_call_message">着信しています</string>
+	<string name="phone_call_attension">(確認)「応答」ボタンを押すと\n自動的にチケットが消費されます</string>
+	<string name="reply_button_title">応答</string>
+	<string name="reject_button_title">拒否</string>
+	<string name="ticket_balance_title">残りチケット</string>
+	<string name="ticket_balance_unit">枚</string>
+	<string name="ticket_buy_button_title">購入する</string>
 </resources>

@@ -1,9 +1,18 @@
 package jp.co.iworks.koreang;
 
 import static jp.co.iworks.koreang.Const.PREF_NAME_APP;
+import static jp.co.iworks.koreang.Const.URL_USER_TICKET_INDEX;
+
+import java.text.NumberFormat;
+
 import jp.co.iworks.koreang.phone.PhoneManager;
 import jp.co.iworks.koreang.phone.PhoneRegistrationHandler;
 import jp.co.iworks.koreang.util.CommonUtils;
+import jp.co.iworks.koreang.web.KoreangHttpClient;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -17,6 +26,8 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+
 public class MainActivity extends FragmentActivity implements TabHost.OnTabChangeListener {
 
     private TabHost mTabHost;
@@ -27,14 +38,22 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupDisplay();
-        
 		commonUtils = new CommonUtils(this);
-    	String uuid = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "uuid");
+        String uuid = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "uuid");
     	String user_id = commonUtils.getSharedPrefsValue(PREF_NAME_APP, "user_id");
+
+    	CommonUtils.setUuid(uuid);
+    	CommonUtils.setUserId(user_id);
+    	
+		setupDisplay();
     	setupManager(user_id, uuid);
     }
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		updateTicket();
+	}
 	@Override
 	public void onTabChanged(String tabId) {
 		if (mLastTabId != tabId) {
@@ -45,6 +64,8 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 				fragmentTransaction.replace(R.id.realtabcontent, new ReservationListFragment());
 			} else if ("favorite".equals(tabId)) {
 				fragmentTransaction.replace(R.id.realtabcontent, new FavoriteListFragment());
+			} else if ("ticket".equals(tabId)) {
+				fragmentTransaction.replace(R.id.realtabcontent, new TicketFragment());
 			} else if ("settings".equals(tabId)) {
 				fragmentTransaction.replace(R.id.realtabcontent, new SettingsFragment());
 			}
@@ -79,8 +100,8 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
     	public MainTabContentView(Context context, String title, int icon) {
     		this(context);
     		View childView = this.inflater.inflate(R.layout.tabwidget, null);
-    		TextView tv1 = (TextView)childView.findViewById(R.id.textview);
     		ImageView iv1 = (ImageView)childView.findViewById(R.id.imageview);
+    		TextView tv1 = (TextView)childView.findViewById(R.id.textview);
     		tv1.setText(title);
     		iv1.setImageResource(icon);
     		addView(childView);
@@ -91,31 +112,63 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
         mTabHost.setup();
         mTabHost.setCurrentTab(1);      
 
-        View childView1 = new MainTabContentView(this, "Search", R.drawable.ic_teacher_search);
+        View childView1 = new MainTabContentView(this, "予約する", R.drawable.ic_teacher_search);
         TabSpec tabTeacher = mTabHost.newTabSpec("search");
         tabTeacher.setIndicator(childView1);
         tabTeacher.setContent(new DummyTabFactory(this));
         mTabHost.addTab(tabTeacher);                      
 
-        View childView2 = new MainTabContentView(this, "Reservation", R.drawable.ic_reservation);
+        View childView2 = new MainTabContentView(this, "確認する", R.drawable.ic_reservation);
         TabSpec tabReservation = mTabHost.newTabSpec("reservation");
         tabReservation.setIndicator(childView2);
         tabReservation.setContent(new DummyTabFactory(this)); 
         mTabHost.addTab(tabReservation);         
         
-        View childView3 = new MainTabContentView(this, "Favorite", R.drawable.ic_favorite);
+        View childView3 = new MainTabContentView(this, "お気に入り", R.drawable.ic_favorite);
         TabSpec tabFavorite = mTabHost.newTabSpec("favorite");
         tabFavorite.setIndicator(childView3);
         tabFavorite.setContent(new DummyTabFactory(this));
         mTabHost.addTab(tabFavorite);
         
-        View childView4 = new MainTabContentView(this, "Settings", R.drawable.ic_settings);
+        View childView5 = new MainTabContentView(this, "チケット", R.drawable.ic_ticket);
+        TabSpec tabTicket = mTabHost.newTabSpec("ticket");
+        tabTicket.setIndicator(childView5);
+        tabTicket.setContent(new DummyTabFactory(this));
+        mTabHost.addTab(tabTicket);
+        
+        View childView4 = new MainTabContentView(this, "その他", R.drawable.ic_settings);
         TabSpec tabProfile = mTabHost.newTabSpec("settings");
         tabProfile.setIndicator(childView4);
         tabProfile.setContent(new DummyTabFactory(this));
         mTabHost.addTab(tabProfile);
         
         mTabHost.setOnTabChangedListener(this);
+        updateTicket();
+    }
+    public void updateTicket() {
+        KoreangHttpClient.get(this, URL_USER_TICKET_INDEX, null, new JsonHttpResponseHandler(){
+
+  			@Override
+  			public void onSuccess(JSONObject response) {
+  				super.onSuccess(response);
+  				TextView txtTicketBalance = (TextView)findViewById(R.id.txtTicketBalance);
+  				try {
+  	    			JSONObject info = response.getJSONObject("info");
+  	    			boolean status = info.getBoolean("status");
+  	    			
+  	    			if (status) {
+  	    				JSONObject ticket = response.getJSONObject("result");
+  	    				int quantity = ticket.getInt("quantity");
+  	    				NumberFormat nf = NumberFormat.getNumberInstance();        	
+  	    				txtTicketBalance.setText(nf.format(quantity));
+  	    				return;
+  	    			}
+  				} catch (JSONException e) {
+  					e.printStackTrace();
+      			}
+  				txtTicketBalance.setText("0");
+  			}
+        });
     }
 	/**
 	 * SipManagerのセットアップ

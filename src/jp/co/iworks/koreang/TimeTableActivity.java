@@ -1,5 +1,10 @@
 package jp.co.iworks.koreang;
 
+import static jp.co.iworks.koreang.Const.URL_RESERVATION_REGIST;
+import static jp.co.iworks.koreang.Const.URL_TIMETABLE_INDEX;
+import static jp.co.iworks.koreang.Const.URL_USER_TICKET_INDEX;
+
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,8 +13,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import jp.co.iworks.koreang.util.CalendarView;
-import jp.co.iworks.koreang.web.APIResponseHandler;
-import jp.co.iworks.koreang.web.WebAPI;
+import jp.co.iworks.koreang.web.KoreangHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +24,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -30,6 +33,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 public class TimeTableActivity extends Activity {
 
@@ -61,23 +67,49 @@ public class TimeTableActivity extends Activity {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.JAPAN);
 		String target = sdf.format(Calendar.getInstance().getTime());
 		setTimeTableAdapter(target);
+		
+        KoreangHttpClient.get(this, URL_USER_TICKET_INDEX, null, new JsonHttpResponseHandler(){
+
+  			@Override
+  			public void onSuccess(JSONObject response) {
+  				super.onSuccess(response);
+  				TextView txtTicketBalance = (TextView)findViewById(R.id.txtTicketBalance);
+  				try {
+  	    			JSONObject info = response.getJSONObject("info");
+  	    			boolean status = info.getBoolean("status");
+  	    			
+  	    			if (status) {
+  	    				JSONObject ticket = response.getJSONObject("result");
+  	    				int quantity = ticket.getInt("quantity");
+  	    				NumberFormat nf = NumberFormat.getNumberInstance();        	
+  	    				txtTicketBalance.setText(nf.format(quantity));
+  	    				return;
+  	    			}
+  				} catch (JSONException e) {
+  					e.printStackTrace();
+      			}
+  				txtTicketBalance.setText("0");
+  			}
+        });
 	}
 	private void setTimeTableAdapter(final String targetDate) {
 		ListView listView = (ListView)findViewById(R.id.listTime);
 		final ArrayAdapter<TimeTable> adapter = new TimeTableAdapter(this, R.layout.time_table_list_row);
 		listView.setAdapter(adapter);
 
-		new WebAPI(this).getTimeTableList(teacher_id, targetDate, new APIResponseHandler() {
+		RequestParams params = new RequestParams();
+		params.add("teacher_id", teacher_id);
+		params.add("target_date", targetDate);
 
+		KoreangHttpClient.get(this, URL_TIMETABLE_INDEX, params, new JsonHttpResponseHandler(){
 			@Override
-			public void onRespond(Object result) {
-				if (result == null) return;
+			public void onSuccess(JSONObject response) {
+				super.onSuccess(response);
 				try {
-					JSONObject json = new JSONObject(result.toString());
-					JSONObject info = json.getJSONObject("result").getJSONObject("info");
+					JSONObject info = response.getJSONObject("result").getJSONObject("info");
 					boolean status = info.getBoolean("status");
 					if (status) {
-						JSONArray list = json.getJSONObject("result").getJSONArray("list");
+						JSONArray list = response.getJSONObject("result").getJSONArray("list");
 						for (int i=0; i<list.length(); i++) {
 							JSONObject data = list.getJSONObject(i);
 							String time_table_id = data.getString("time_table_id");
@@ -93,7 +125,10 @@ public class TimeTableActivity extends Activity {
 								startDate = formatter.parse(start_date);
 								endDate = formatter.parse(end_date);
 								
-								Date now = Calendar.getInstance().getTime();
+								// 5分前までしか表示しない
+								Calendar cal = Calendar.getInstance();
+								cal.add(Calendar.MINUTE, 5);
+								Date now = cal.getTime();
 								if (now.after(startDate)) {
 									continue;
 								}
@@ -110,6 +145,7 @@ public class TimeTableActivity extends Activity {
 				}
 			}
 		});
+
 	}
 
 	private class TimeTable {
@@ -185,7 +221,7 @@ public class TimeTableActivity extends Activity {
 				public void onClick(View v) {
 					AlertDialog.Builder confirm = new AlertDialog.Builder(TimeTableActivity.this);
 					confirm.setTitle("確認");
-					confirm.setMessage("通話が開始される際に" + timeTable.getPrice() + "pt消費されます。\n予約しても宜しいですか？");
+					confirm.setMessage("通話が開始される際に" + timeTable.getPrice() + "枚消費されます。\n予約しても宜しいですか？");
 					confirm.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 						
 						@Override
@@ -209,7 +245,7 @@ public class TimeTableActivity extends Activity {
 				return view;
 			}
 			if (!timeTable.getReserved()) {
-				btnReserve.setText(timeTable.getPrice().toString() + "pt で予約");
+				btnReserve.setText(timeTable.getPrice().toString() + "枚 で予約");
 				btnReserve.setEnabled(true);
 			} else {
 				btnReserve.setText("予約済み");
@@ -219,21 +255,25 @@ public class TimeTableActivity extends Activity {
 		}
 	}
 	private void registReservation(final TimeTable timeTable) {
+		RequestParams params = new RequestParams();
+		params.add("teacher_id", teacher_id);
+		params.add("time_table_id", timeTable.getId());
+		params.add("target_date", timeTable.getTargetDate());
+		params.add("price", timeTable.getPrice());
 		showProgress();
-		new WebAPI(TimeTableActivity.this).postReservation(teacher_id, timeTable.getId(), timeTable.getTargetDate(), timeTable.getPrice(), new APIResponseHandler() {
-
+		KoreangHttpClient.post(this, URL_RESERVATION_REGIST, params, new JsonHttpResponseHandler(){
 			@Override
-			public void onRespond(Object result) {
+			public void onSuccess(JSONObject response) {
+				super.onSuccess(response);
 				hideProgress();
 				
 				AlertDialog.Builder alert = new AlertDialog.Builder(TimeTableActivity.this);
 				try {
-					JSONObject json = new JSONObject(result.toString());
-					boolean status = json.getJSONObject("result").getJSONObject("info").getBoolean("status");
+					boolean status = response.getJSONObject("result").getJSONObject("info").getBoolean("status");
 					if (status) {
 						alert.setTitle("完了");
 						alert.setMessage("予約が正常に完了しました。");
-						alert.setPositiveButton("OK", new OnClickListener() {
+						alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
 							@Override
 							public void onClick(
@@ -245,7 +285,7 @@ public class TimeTableActivity extends Activity {
 					} else {
 						alert.setTitle("失敗");
 						alert.setMessage("既に予約されているため予約出来ませんでした。");
-						alert.setPositiveButton("OK", new OnClickListener() {
+						alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
 							@Override
 							public void onClick(

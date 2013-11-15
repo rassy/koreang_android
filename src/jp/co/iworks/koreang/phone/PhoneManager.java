@@ -136,6 +136,9 @@ public class PhoneManager {
     	call.close();
 
     }
+    public String getPeerUserName() {
+    	return call.getPeerProfile().getUserName();
+    }
     public void closeManager(Context context) {         
 	    if (call != null) {
 	        call.close();

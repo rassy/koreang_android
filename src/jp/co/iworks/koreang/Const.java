@@ -33,6 +33,10 @@ public class Const {
 	public static final String URL_RESERVATION_REGIST = "/reservations/regist.json";
 	public static final String URL_RESERVATION_INDEX_BY_UUID = "/reservations/indexByUuid.json";
 	public static final String URL_RESERVAION_CANCEL = "/reservations/cancel.json";
+	public static final String URL_TICKET_INDEX = "/tickets/index.json";
+	public static final String URL_USER_TICKET_INDEX = "/userTickets/index.json";
+	public static final String URL_USER_TICKET_REGIST = "/userTickets/regist.json";
+	public static final String URL_RESERVATION_CONSUME = "/reservations/consume.json";
 	
 	public static final String BASE_HOST = HOST_STAGING;
 	
