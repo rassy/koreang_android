@@ -49,43 +49,45 @@ public class TeacherListFragment extends Fragment {
 			@Override
 			public void onSuccess(JSONObject response) {
 				super.onSuccess(response);
-				List<String> urlList = new ArrayList<String>();
 				try {
 					JSONObject info = response.getJSONObject("info");
 					boolean status = info.getBoolean("status");
-					if (status) {
-						JSONArray list = response.getJSONArray("list");
-						final List<Teacher> teacherList = new ArrayList<Teacher>();
-						for (int i=0; i<list.length(); i++) {
-							JSONObject teacherJson = list.getJSONObject(i);
-							String id = teacherJson.getString("id");
-							String url = teacherJson.getString("url");
-							if (url != null) {
-								urlList.add(url);
-	 							Teacher teacher = new Teacher();
-	 							teacher.setId(id);
-	 							teacher.setUrl(url);
-	 							teacherList.add(teacher);
-							}
-						}
- 						GridView gridView = (GridView)view.findViewById(R.id.gvTeacher);
- 				    	gridView.setAdapter(new ImageGridViewAdapter(getActivity(), urlList));
- 				    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
- 							@Override
- 							public void onItemClick(AdapterView<?> parent,
- 									View view, int position, long id) {
- 								Teacher teacher = teacherList.get(position);
- 								openProfile(teacher);
- 							}
- 						});
- 				    	gridView.invalidate();
+					if (!status) {
+						
 					}
 				} catch (JSONException e) {
-					
 				}
+
+				final List<Teacher> teacherList = new ArrayList<Teacher>();
+				try {
+					JSONArray list = response.getJSONArray("list");
+					for (int i=0; i<list.length(); i++) {
+						JSONObject teacherJson = list.getJSONObject(i);
+						String id = teacherJson.getString("id");
+						String url = teacherJson.getString("url");
+						String nickname = teacherJson.getString("name");
+						Teacher teacher = new Teacher();
+						teacher.setId(id);
+						teacher.setUrl(url);
+						teacher.setNickname(nickname);
+						teacherList.add(teacher);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				GridView gridView = (GridView)view.findViewById(R.id.gvTeacher);
+		    	gridView.setAdapter(new ImageGridViewAdapter(getActivity(), teacherList));
+		    	gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> parent,
+							View view, int position, long id) {
+						Teacher teacher = teacherList.get(position);
+						openProfile(teacher);
+					}
+				});
+		    	gridView.invalidate();
 			}
-    		
     	});
      }
 }

@@ -78,7 +78,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="ファン" />
+			    />
 			<!-- 誕生日 -->
 			<TextView
 			    android:id="@+id/lblBirthday"
@@ -96,7 +96,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="7月10日" />
+			    />
 			<!-- 身長 -->
 			<TextView
 			    android:id="@+id/lblHeight"
@@ -114,7 +114,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="179cm" />
+			    />
 			<!-- 血液型 -->
 			<TextView
 			    android:id="@+id/lblBlood"
@@ -132,7 +132,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="B型" />
+			    />
 			<!-- 家族構成 -->
 			<TextView
 			    android:id="@+id/lblFamily"
@@ -150,7 +150,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="父・母・妹" />
+			    />
 			<!-- 好きなタイプ -->
 			<TextView
 			    android:id="@+id/lblLikeType"
@@ -168,7 +168,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="一緒に居て癒される人" />
+			    />
 			<!-- マイブーム -->
 			<TextView
 			    android:id="@+id/lblMyBoom"
@@ -186,7 +186,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="料理作り♪\n最近、料理教室に通い始めました。ぜひ良かったら、簡単に作れるおススメレシピ教えて下さい。" />
+			    />
 			<!-- 好きな食べ物 -->
 			<TextView
 			    android:id="@+id/lblLikeFood"
@@ -204,7 +204,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="된장찌개(ﾃﾞﾝｼﾞｬﾝﾁｹﾞ)、カレー、パフェㅎㅎㅎ" />			
+			    />			
 			<!-- 似ている芸能人 -->
 			<TextView
 			    android:id="@+id/lblLookLike"
@@ -222,7 +222,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="ＴＯＰ(BigBang)に似ているとよく言われます(*/□＼*)" />
+			     />
 			<!-- あだ名 -->
 			<TextView
 			    android:id="@+id/lblAdana"
@@ -240,7 +240,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="マッシュルーム。\n中学生の時、マッシュルームみたいな髪型で登校していた為。。。(〃_ _)σ∥" />
+			     />
 			<!-- 好きな映画・ドラマ -->
 			<TextView
 			    android:id="@+id/lblLikeMovie"
@@ -258,7 +258,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="내 머리 속에 지우게(私の頭の中の消しゴム)" />
+			    />
 			<!-- 好きなシーンetc. -->
 			<TextView
 			    android:id="@+id/lblLikeMovieScene"
@@ -276,7 +276,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="いつも一人で見て泣いてます。そして손예진も好きな女優さんの一人～\n特に好きなシーンは、バッティングセンターで病気の事を打ち明ける所！！" />
+			    />
 			<!-- 好きな女性のしぐさ -->
 			<TextView
 			    android:id="@+id/lblLikeShigusa"
@@ -294,7 +294,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="遠くをみて考えごとをしている姿♡" />
+			    />
 			<!-- ストレス解消法は？？？ -->
 			<TextView
 			    android:id="@+id/lblStress"
@@ -312,7 +312,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="カラオケ！！！\nとにかく歌うことが大好きです。いつも歌うのはバラード系です。" />
+			    />
 			<!-- 何フェチですか？？ -->
 			<TextView
 			    android:id="@+id/lblFetch"
@@ -330,7 +330,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="手" />
+			    />
 			<!-- SorM？？ -->
 			<TextView
 			    android:id="@+id/lblSM"
@@ -348,7 +348,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="Sかなぁ・・・" />
+			    />
 			<!-- 最後に一言 -->
 			<TextView
 			    android:id="@+id/lblMessage"
@@ -366,7 +366,7 @@
 			    android:layout_marginTop="5dp"
 			    android:layout_marginLeft="20dp"
 			    android:textSize="16sp"
-			    android:text="高校生の時から日本が大好きで独学で日本語を勉強しています。そして今、大好きな日本で韓国語を教える仕事が出来てとても嬉しいです♪みなさん、僕と一緒に楽しく勉強しましょうㅋㅋㅋ아자 아자 화이팅～！！" />													
+			    />													
 		</LinearLayout>
 	</ScrollView>
 </RelativeLayout>

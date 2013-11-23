@@ -4,15 +4,16 @@ import java.io.File;
 import java.util.List;
 
 import jp.co.iworks.koreang.R;
+import jp.co.iworks.koreang.dto.Teacher;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
@@ -21,23 +22,25 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
 
 
 public class ImageGridViewAdapter extends BaseAdapter {
-	private Context mContext;
-	private List<String> urlList;
+	private List<Teacher> teacherList;
 	private LayoutInflater inflater;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
 
-	public ImageGridViewAdapter(Context context, List<String> urlList) {
-		mContext = context;
-		this.urlList = urlList;
+	public ImageGridViewAdapter(Context context, List<Teacher> teacherList) {
+		this.teacherList = teacherList;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
 		File cacheDir = StorageUtils.getCacheDirectory(context);
+		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+				.cacheInMemory(true)
+				.cacheOnDisc(true)
+				.build();
+		
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
 		        .memoryCacheExtraOptions(480, 800) // default = device screen dimensions
 		        .discCacheExtraOptions(480, 800, CompressFormat.JPEG, 75, null)
@@ -56,7 +59,7 @@ public class ImageGridViewAdapter extends BaseAdapter {
 		        .discCacheFileNameGenerator(new HashCodeFileNameGenerator()) // default
 		        .imageDownloader(new BaseImageDownloader(context)) // default
 		        //.imageDecoder(new BaseImageDecoder()) // default
-		        .defaultDisplayImageOptions(DisplayImageOptions.createSimple()) // default
+		        .defaultDisplayImageOptions(defaultOptions) // default
 		        .writeDebugLogs()
 		        .build();
 		imageLoader.init(config);
@@ -69,16 +72,20 @@ public class ImageGridViewAdapter extends BaseAdapter {
 		final ImageView imageView;
 		View view = convertView;
 		if (convertView == null) {
-			view = (LinearLayout) inflater.inflate(R.layout.teacher_list_grid, parent, false);
+			view = (RelativeLayout) inflater.inflate(R.layout.teacher_list_grid, parent, false);
 		} else {
-			view = (LinearLayout) convertView;
+			view = (RelativeLayout) convertView;
 		}
-		final LinearLayout layout = (LinearLayout)view;
+		final RelativeLayout layout = (RelativeLayout)view;
 		
 		// 画像
 		imageView = (ImageView) layout.findViewById(R.id.imagegridview_iv_image);
-
-		imageLoader.displayImage(urlList.get(position), imageView);
+		Teacher teacher = teacherList.get(position);
+		imageLoader.displayImage(teacher.getUrl(), imageView);
+		
+		TextView txtView = (TextView)layout.findViewById(R.id.imagegridview_txt_name);
+		txtView.setText(teacher.getNickname());
+		
 		return view;
 	}
 
@@ -94,6 +101,6 @@ public class ImageGridViewAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return urlList.size();
+		return teacherList.size();
 	}
 }

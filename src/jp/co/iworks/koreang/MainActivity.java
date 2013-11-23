@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -176,16 +177,19 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 	 * @param uuid UUID
 	 */
     private void setupManager(String user_id, String uuid) {
+    	final TextView txtTitle = (TextView)findViewById(R.id.txtTitle);
     	PhoneManager.getInstance().initializeManager(this, "888" + user_id, uuid, new PhoneRegistrationHandler() {
 
 			@Override
 			public void onRegistering(String localProfileUri) {
 				CommonUtils.LOG("SIP Registering. localProfileUri="+localProfileUri);
+				txtTitle.setTextColor(Color.YELLOW);
 			}
 
 			@Override
 			public void onRegistrationDone(String localProfileUri, long expiryTime) {
 				CommonUtils.LOG("SIP Registration finished. localProfileUri="+localProfileUri);
+				txtTitle.setTextColor(Color.GREEN);
 				if (!setup) {
 					setup = true;
 					onTabChanged("search");
@@ -195,7 +199,14 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 			@Override
 			public void onRegistrationFailed(String localProfileUri, int errorCode, String errorMessage) {
 				CommonUtils.LOG("SIP Registration failed. localProfileUri="+localProfileUri+",errorCode="+errorCode+",message="+errorMessage);
+				txtTitle.setTextColor(Color.RED);
 			}
     	});
     }
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		PhoneManager.getInstance().closeManager(this);
+	}
 }

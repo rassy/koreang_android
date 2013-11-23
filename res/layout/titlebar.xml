@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-    android:background="#2886cc"
-    android:gravity="center_vertical">
+    	android:background="#2886cc"
+    	android:gravity="center_vertical">
     	
 	    <TextView
 	        android:id="@+id/txtTitle"

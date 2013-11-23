@@ -85,6 +85,12 @@ public class PhoneCallingFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 	            startTalk();
+//				try {
+//					PhoneManager.getInstance().startTalk();
+//					((PhoneTalkActivity)getActivity()).onChangeStatus();
+//				} catch (SipException e) {
+//					e.printStackTrace();
+//				}
 	            if (mp.isPlaying()) {
 	            	mp.stop();
 	            }

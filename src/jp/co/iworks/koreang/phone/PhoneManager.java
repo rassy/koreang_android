@@ -45,6 +45,7 @@ public class PhoneManager {
         }
     	try {
 			SipProfile.Builder builder = new SipProfile.Builder(user_id, SIP_SERVER);
+			//builder.setPort(15060);
 			builder.setPassword(password);
 			profile = builder.build();
 		} catch (Exception e) {
@@ -52,7 +53,14 @@ public class PhoneManager {
 			commonUtils.showErrorDialog(e.toString());
 			return;
 		}
-    	
+    	try{
+    		boolean isRegistered = manager.isRegistered(profile.getUriString());
+    		if (isRegistered) {
+    			return;
+    		}
+    	} catch (SipException e) {
+    		e.printStackTrace();
+    	}
     	Intent i = new Intent();
     	i.setAction("android.koreang.INCOMMING_CALL");
     	PendingIntent pi = PendingIntent.getBroadcast(context, SIP_REQUEST_CODE, i, Intent.FILL_IN_DATA);
@@ -130,6 +138,7 @@ public class PhoneManager {
     public void startTalk() throws SipException {
 		call.answerCall(30);
         call.startAudio();
+        call.setSpeakerMode(true);
     }
     public void endTalk() throws SipException {
     	call.endCall();
